@@ -88,6 +88,18 @@ export function useFamilyData() {
     return { ok: true as const, family: updatedFamily };
   };
 
+  const regenerateInviteCode = () => {
+    if (!activeFamily) return null;
+    const updatedFamily: Family = { ...activeFamily, inviteCode: generateInviteCode() };
+    const next: FamilyDB = { ...db, families: { ...db.families, [activeFamily.id]: updatedFamily } };
+    persist(next);
+    return updatedFamily.inviteCode;
+  };
+
+  const leaveFamily = () => {
+    persist({ ...db, session: {} });
+  };
+
   const addExpense = (payload: Omit<Expense, 'id' | 'createdAt' | 'memberId'>) => {
     if (!activeFamily || !db.session.activeMemberId) return false;
     const expense: Expense = {
@@ -129,6 +141,8 @@ export function useFamilyData() {
     activeMember,
     createFamily,
     joinFamily,
+    regenerateInviteCode,
+    leaveFamily,
     addExpense,
     deleteExpense,
     getFilteredExpenses,
