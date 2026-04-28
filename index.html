@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FamilyLedger</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── Dark Mode ── */
+    body.dark-mode {
+      --bg: #0f1117; --white: #1a1d27; --card: #1e2130; --border: #2a2f45;
+      --text: #e8eaf6; --muted: #6b7280; --primary-light: #1e2240;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.3); --shadow: 0 4px 16px rgba(0,0,0,.4);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,.5); background: #070a10;
+    }
+    body.dark-mode .phone-shell { background: var(--white); }
+    body.dark-mode .status-bar { background: var(--white); color: var(--text); }
+    body.dark-mode .nav-bar { background: var(--white); border-color: var(--border); }
+    body.dark-mode .field-input, body.dark-mode .field-select { background: var(--card); color: var(--text); border-color: var(--border); }
+    body.dark-mode .insight-card { background: #0c2030; border-color: #1e4060; }
+    body.dark-mode .insight-item.info { background: #0a2840; color: #93c5fd; }
+    body.dark-mode .insight-item.warn { background: #2a1f00; color: #fcd34d; }
+    body.dark-mode .insight-item.danger { background: #2a0a0a; color: #fca5a5; }
+    body.dark-mode .top-spender { background: #1f1600; border-color: #4a3500; }
+    body.dark-mode .btn-secondary { background: var(--card); color: var(--text); border-color: var(--border); }
+    body.dark-mode .code-box { background: var(--card); border-color: var(--border); }
+    body.dark-mode .cat-item { background: var(--card); border-color: var(--border); }
+    body.dark-mode .cat-item.selected { background: #1e2240; border-color: var(--primary); }
+    body.dark-mode .img-upload, body.dark-mode .img-upload-btn { border-color: var(--border); }
+
+    /* Fix #7: Dashboard fixed phone-size layout */
+    #s-dashboard { position: relative; overflow: hidden; }
+    #s-dashboard .screen-scroll { padding-bottom: 80px; }
+    #s-dashboard .fab-wrap { position: absolute; bottom: 72px; right: 18px; z-index: 20; }
+    #s-dashboard .nav-bar { position: absolute; bottom: 0; left: 0; right: 0; }
+
+    /* Fix #13: Expense expand */
+    .exp-expand-btn {
+      background: none; border: none; cursor: pointer; color: var(--muted);
+      font-size: 16px; padding: 4px 6px; transition: transform .2s; flex-shrink: 0;
+    }
+    .exp-expand-btn.open { transform: rotate(180deg); color: var(--primary); }
+    .exp-detail-row {
+      display: none; flex-direction: column; gap: 6px;
+      padding: 6px 0 8px 50px; font-size: 12px; color: var(--muted); font-family: var(--font-body);
+    }
+    .exp-detail-row.open { display: flex; }
+    .exp-detail-img { max-width: 100%; max-height: 120px; border-radius: 10px; object-fit: cover; margin-top: 4px; display: block; }
+
+    /* Fix #14: Image upload */
+    .img-upload-options { display: flex; gap: 10px; }
+    .img-upload-btn {
+      flex: 1; padding: 14px 8px; border-radius: var(--radius-sm);
+      border: 2px dashed var(--border); background: var(--white); color: var(--muted);
+      cursor: pointer; font-family: var(--font-body); font-size: 12px; text-align: center; transition: all .15s;
+    }
+    .img-upload-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .img-upload-btn .img-upload-icon { font-size: 22px; margin-bottom: 4px; }
+    .img-preview-wrap { position: relative; }
+    .img-preview-wrap img { width: 100%; border-radius: var(--radius-sm); max-height: 150px; object-fit: cover; display: block; }
+    .img-remove {
+      position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,.5); color: #fff;
+      border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer;
+      font-size: 13px; display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Fix #4: Custom category */
+    .custom-cat-row { display: flex; gap: 8px; margin-bottom: 14px; }
+    .custom-cat-row input {
+      padding: 10px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--border);
+      background: var(--white); font-family: var(--font-body); font-size: 13px; color: var(--text); outline: none;
+    }
+    .custom-cat-row input:focus { border-color: var(--primary); }
+    .custom-cat-row button {
+      padding: 10px 14px; border-radius: var(--radius-sm); background: var(--primary);
+      border: none; color: #fff; font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+    }
+
+    /* Fix #9: Generate code button */
+    .gen-code-btn {
+      width: 100%; margin-top: 8px; padding: 12px; border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border); background: var(--white); color: var(--primary);
+      font-family: var(--font); font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s;
+    }
+    .gen-code-btn:hover { border-color: var(--primary); background: var(--primary-light); }
+
+    /* Fix #11: Chart toggle */
+    .chart-toggle { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .chart-toggle-btn {
+      padding: 8px 14px; border-radius: 99px; border: 1.5px solid var(--border);
+      background: var(--white); color: var(--muted); font-family: var(--font); font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s;
+    }
+    .chart-toggle-btn.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
+
+    /* Fix #12: Dark mode toggle */
+    .toggle-switch {
+      width: 44px; height: 24px; border-radius: 99px; background: var(--border);
+      position: relative; cursor: pointer; transition: background .2s; flex-shrink: 0; border: none;
+    }
+    .toggle-switch.on { background: var(--primary); }
+    .toggle-knob {
+      width: 18px; height: 18px; border-radius: 50%; background: #fff;
+      position: absolute; top: 3px; left: 3px; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .toggle-switch.on .toggle-knob { transform: translateX(20px); }
+
+    /* Overspent pill */
+    .overspent-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(239,68,68,.25); border: 1px solid rgba(239,68,68,.5);
+      border-radius: 20px; padding: 5px 12px; font-size: 12px; color: #fca5a5; font-weight: 500; font-family: var(--font);
+    }
+
+    /* Fix #7: Add-expense scrollable */
+    .add-expense-screen { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0 24px 40px; scrollbar-width: none; }
+    .add-expense-screen::-webkit-scrollbar { display: none; }
+
+    /* Settings row */
+    .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-row span:first-child { font-family: var(--font); font-size: 14px; }
+    .settings-val { font-family: var(--font); font-size: 14px; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<!-- Fix #14: Hidden file inputs -->
+<input type="file" id="file-gallery" accept="image/*" style="display:none" onchange="handleFileInput(this)">
+<input type="file" id="file-camera" accept="image/*" capture="environment" style="display:none" onchange="handleFileInput(this)">
+
+<div class="phone-shell" id="app">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span>9:41</span>
+    <div class="status-icons">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+    </div>
+  </div>
+
+  <!-- SCREEN 1: WELCOME -->
+  <div class="screen active" id="s-welcome">
+    <div class="onboard-wrap">
+      <div class="onboard-illustration">💰</div>
+      <h1 class="onboard-title">Family<br>Budgeting</h1>
+      <p class="onboard-sub">Track shared expenses, get smart insights, and keep your family's finances on track — together.</p>
+      <button class="btn-primary" onclick="goto('s-create-form')">Create a Family</button>
+      <button class="btn-secondary" onclick="goto('s-join-form')">Join a Family</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: CREATE FAMILY FORM -->
+  <div class="screen" id="s-create-form">
+    <div class="form-screen">
+      <div class="form-back" onclick="goto('s-welcome')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Back
+      </div>
+      <h2 class="form-title">Create Family</h2>
+      <p class="form-sub">Set up your shared budget space</p>
+      <div class="field-group">
+        <label class="field-label">Your Name</label>
+        <input class="field-input" type="text" placeholder="e.g. Ahmad" id="creator-name" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Family Name</label>
+        <input class="field-input" type="text" placeholder="e.g. Al-Younis Family" id="family-name-input" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Monthly Budget (JOD)</label>
+        <input class="field-input" type="number" placeholder="e.g. 500" id="family-budget-input" />
+      </div>
+      <button class="btn-primary" onclick="goToCategories()" style="margin-top:10px">Next →</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: CATEGORIES -->
+  <div class="screen" id="s-categories">
+    <div class="form-screen" style="overflow-y:auto;flex:1;padding-bottom:30px;">
+      <div class="form-back" onclick="goto('s-create-form')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Back
+      </div>
+      <h2 class="form-title">Track Categories</h2>
+      <p class="form-sub">Select the spending categories relevant to your family</p>
+      <div class="cat-grid" id="cat-grid">
+        <div class="cat-item selected" data-cat="Food" onclick="toggleCat(this)"><div class="cat-emoji">🍔</div><div class="cat-name">Food</div></div>
+        <div class="cat-item selected" data-cat="Transport" onclick="toggleCat(this)"><div class="cat-emoji">🚗</div><div class="cat-name">Transport</div></div>
+        <div class="cat-item selected" data-cat="Bills" onclick="toggleCat(this)"><div class="cat-emoji">💡</div><div class="cat-name">Bills</div></div>
+        <div class="cat-item" data-cat="Health" onclick="toggleCat(this)"><div class="cat-emoji">🏥</div><div class="cat-name">Health</div></div>
+        <div class="cat-item" data-cat="Education" onclick="toggleCat(this)"><div class="cat-emoji">📚</div><div class="cat-name">Education</div></div>
+        <div class="cat-item" data-cat="Shopping" onclick="toggleCat(this)"><div class="cat-emoji">🛍️</div><div class="cat-name">Shopping</div></div>
+        <div class="cat-item" data-cat="Entertainment" onclick="toggleCat(this)"><div class="cat-emoji">🎮</div><div class="cat-name">Entertainment</div></div>
+        <div class="cat-item" data-cat="Travel" onclick="toggleCat(this)"><div class="cat-emoji">✈️</div><div class="cat-name">Travel</div></div>
+        <div class="cat-item" data-cat="Rent" onclick="toggleCat(this)"><div class="cat-emoji">🏠</div><div class="cat-name">Rent</div></div>
+        <div class="cat-item" data-cat="Groceries" onclick="toggleCat(this)"><div class="cat-emoji">🛒</div><div class="cat-name">Groceries</div></div>
+        <div class="cat-item" data-cat="Clothing" onclick="toggleCat(this)"><div class="cat-emoji">👕</div><div class="cat-name">Clothing</div></div>
+        <div class="cat-item" data-cat="Subscriptions" onclick="toggleCat(this)"><div class="cat-emoji">📱</div><div class="cat-name">Subscriptions</div></div>
+        <div class="cat-item" data-cat="Savings" onclick="toggleCat(this)"><div class="cat-emoji">🏦</div><div class="cat-name">Savings</div></div>
+        <div class="cat-item" data-cat="Gifts" onclick="toggleCat(this)"><div class="cat-emoji">🎁</div><div class="cat-name">Gifts</div></div>
+        <div class="cat-item" data-cat="Other" onclick="toggleCat(this)"><div class="cat-emoji">➕</div><div class="cat-name">Other</div></div>
+      </div>
+      <!-- Fix #4: Custom category -->
+      <p style="font-size:12px;color:var(--muted);font-family:var(--font);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Add Custom Category</p>
+      <div class="custom-cat-row">
+        <input type="text" id="custom-cat-emoji" placeholder="😀" style="width:56px;text-align:center;" maxlength="2" />
+        <input type="text" id="custom-cat-name" placeholder="Category name..." style="flex:1;" />
+        <button onclick="addCustomCategory()">+ Add</button>
+      </div>
+      <button class="btn-primary" onclick="createFamily()">Create Family 🎉</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: SUCCESS -->
+  <div class="screen" id="s-success">
+    <div class="success-wrap">
+      <div class="success-icon">✅</div>
+      <h2 class="success-title">Family Created!</h2>
+      <p class="success-sub" id="success-msg">Share this code with your family members so they can join</p>
+      <div class="code-box" id="success-code">ABC789</div>
+      <p class="code-hint">Tap to copy • Share with family members</p>
+      <button class="btn-primary" onclick="goto('s-dashboard')">Go to Dashboard</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 5: JOIN FAMILY FORM -->
+  <div class="screen" id="s-join-form">
+    <div class="form-screen">
+      <div class="form-back" onclick="goto('s-welcome')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Back
+      </div>
+      <h2 class="form-title">Join a Family</h2>
+      <p class="form-sub">Enter the code your family admin shared with you</p>
+      <div class="field-group">
+        <label class="field-label">Your Name</label>
+        <input class="field-input" type="text" placeholder="e.g. Sara" id="joiner-name" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Family Code</label>
+        <input class="field-input" type="text" placeholder="e.g. ABC789" id="join-code" style="letter-spacing:4px;font-size:18px;text-align:center;font-weight:700;" />
+      </div>
+      <button class="btn-primary" onclick="joinFamily()" style="margin-top:10px">Join Family →</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 6: DASHBOARD -->
+  <div class="screen" id="s-dashboard">
+    <div class="screen-scroll">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Dashboard</div>
+          <div class="page-sub">April 2025 Overview</div>
+        </div>
+        <div id="dash-avatar" style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#5c6ef8,#818cf8);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-family:var(--font);font-size:15px;">A</div>
+      </div>
+
+      <div class="budget-card">
+        <div class="budget-label">Total Budget</div>
+        <div class="budget-amount" id="budget-amount">500 <span>JOD</span></div>
+        <div class="budget-row">
+          <div class="budget-chip" id="chip-spent">Spent: 420 JOD</div>
+          <div class="budget-chip danger" id="chip-left">Left: 80 JOD</div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>0 JOD</span><span id="pct-lbl">84% used</span><span id="budget-total-lbl">500 JOD</span></div>
+          <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:84%"></div></div>
+        </div>
+        <div class="warn-pill" id="warn-pill">⚠️ Only 80 JOD remaining</div>
+      </div>
+
+      <div class="section-header"><div class="section-title">💡 Insights</div></div>
+      <div class="card insight-card card-pad" style="animation-delay:.05s">
+        <div class="insight-item info"><div class="insight-dot"></div>You spend <strong>45%</strong> on Food — that's above average for a family of 4</div>
+        <div class="insight-item warn"><div class="insight-dot"></div>Spending <strong>increased by 20%</strong> compared to last week</div>
+        <div class="insight-item danger" id="insight-days"><div class="insight-dot"></div>At this rate, budget will <strong>run out in 6 days</strong></div>
+        <div class="insight-item warn"><div class="insight-dot"></div>Consider reducing Food spending by <strong>30 JOD</strong> to stay on track</div>
+      </div>
+
+      <div class="section-header" style="margin-top:4px"><div class="section-title">Spending Breakdown</div></div>
+      <div class="card card-pad" style="animation-delay:.1s" id="breakdown-card"></div>
+
+      <div class="top-spender" style="animation-delay:.15s">
+        <div class="top-avatar" id="top-avatar">A</div>
+        <div class="top-info">
+          <div class="top-badge">🏆 Top Spender This Month</div>
+          <div class="top-name" id="top-name">Ahmad</div>
+        </div>
+        <div class="top-amount" id="top-amount">200 JOD</div>
+      </div>
+
+      <div class="section-header">
+        <div class="section-title">Recent Expenses</div>
+        <div class="section-link" onclick="goto('s-all-expenses')">View All</div>
+      </div>
+      <div class="card card-pad" style="animation-delay:.2s" id="recent-list"></div>
+    </div>
+
+    <div class="fab-wrap"><button class="fab" onclick="goto('s-add-expense')">+</button></div>
+
+    <div class="nav-bar" id="nav-home">
+      <div class="nav-item active" onclick="navTo('s-dashboard',this,'nav-home')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home<div class="nav-dot"></div></div>
+      <div class="nav-item" onclick="navTo('s-analytics',this,'nav-home')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Budget<div class="nav-dot"></div></div>
+      <div class="nav-item" onclick="navTo('s-family',this,'nav-home')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Family<div class="nav-dot"></div></div>
+      <div class="nav-item" onclick="navTo('s-settings',this,'nav-home')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>Settings<div class="nav-dot"></div></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 7: ADD EXPENSE -->
+  <div class="screen" id="s-add-expense">
+    <div class="add-expense-screen">
+      <div class="form-back" onclick="goto('s-dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Back
+      </div>
+      <h2 class="form-title">Add Expense</h2>
+      <p class="form-sub">Log a new family expense quickly</p>
+      <div class="field-group"><label class="field-label">Title</label><input class="field-input" type="text" placeholder="e.g. Grocery run" id="exp-title" /></div>
+      <div class="field-group"><label class="field-label">Amount (JOD)</label><input class="field-input" type="number" placeholder="0.00" style="font-size:20px;font-weight:700;" id="exp-amount" /></div>
+      <div class="field-group">
+        <label class="field-label">Expense Type</label>
+        <select class="field-select" id="exp-type">
+          <option>🍔 Food</option><option>🚗 Transport</option><option>💡 Bills</option>
+          <option>🏥 Health</option><option>📚 Education</option><option>🛍️ Shopping</option>
+          <option>🎮 Entertainment</option><option>✈️ Travel</option><option>🏠 Rent</option>
+          <option>🛒 Groceries</option><option>👕 Clothing</option><option>📱 Subscriptions</option>
+          <option>🏦 Savings</option><option>🎁 Gifts</option><option>➕ Other</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Paid By</label>
+        <select class="field-select" id="exp-paid-by"><option>Ahmad</option><option>Sara</option><option>Younis</option><option>Lina</option></select>
+      </div>
+      <div class="field-group"><label class="field-label">Note (Optional)</label><input class="field-input" type="text" placeholder="Any extra details..." id="exp-note" /></div>
+      <div class="field-group">
+        <label class="field-label">Receipt / Image (Optional)</label>
+        <div id="img-upload-area">
+          <div class="img-upload-options">
+            <div class="img-upload-btn" onclick="document.getElementById('file-gallery').click()"><div class="img-upload-icon">🖼️</div>Gallery / File</div>
+            <div class="img-upload-btn" onclick="document.getElementById('file-camera').click()"><div class="img-upload-icon">📷</div>Camera</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="saveExpense()" style="margin-top:8px">Save Expense ✓</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 8: ALL EXPENSES -->
+  <div class="screen" id="s-all-expenses">
+    <div class="screen-scroll">
+      <div class="page-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--muted);font-size:14px;font-family:var(--font);font-weight:500;margin-bottom:4px;" onclick="goto('s-dashboard')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Back
+          </div>
+          <div class="page-title">All Expenses</div>
+          <div class="page-sub" id="all-exp-sub">April 2025 • 10 transactions</div>
+        </div>
+      </div>
+      <div class="card card-pad"><div id="all-expense-list"></div></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 9: FAMILY -->
+  <div class="screen" id="s-family">
+    <div class="screen-scroll">
+      <div class="page-header">
+        <div>
+          <div class="page-title" id="family-page-title">Al-Younis Family</div>
+          <div class="page-sub" id="family-page-sub">4 members · Code: ABC789</div>
+        </div>
+        <div style="font-size:20px;cursor:pointer;">⚙️</div>
+      </div>
+      <div class="card card-pad" id="members-card">
+        <div class="member-item"><div class="member-avatar" style="background:#eef2ff;color:#4338ca;" id="fam-m1-av">A</div><div class="member-info"><div class="member-name" id="fam-m1-name">Ahmad</div><div class="member-role" id="fam-m1-role">Admin · 5 expenses</div><div class="member-bar"><div class="member-bar-fill" style="width:80%;background:#5c6ef8;"></div></div></div><div class="member-spend">200 JOD</div></div>
+        <div class="member-item"><div class="member-avatar" style="background:#f5f3ff;color:#6d28d9;">S</div><div class="member-info"><div class="member-name">Sara</div><div class="member-role">Member · 4 expenses</div><div class="member-bar"><div class="member-bar-fill" style="width:55%;background:#8b5cf6;"></div></div></div><div class="member-spend">120 JOD</div></div>
+        <div class="member-item"><div class="member-avatar" style="background:#fff7ed;color:#c2410c;">Y</div><div class="member-info"><div class="member-name">Younis</div><div class="member-role">Member · 2 expenses</div><div class="member-bar"><div class="member-bar-fill" style="width:35%;background:#f59e0b;"></div></div></div><div class="member-spend">70 JOD</div></div>
+        <div class="member-item"><div class="member-avatar" style="background:#ecfdf5;color:#065f46;">L</div><div class="member-info"><div class="member-name">Lina</div><div class="member-role">Member · 1 expense</div><div class="member-bar"><div class="member-bar-fill" style="width:15%;background:#10b981;"></div></div></div><div class="member-spend">30 JOD</div></div>
+      </div>
+
+      <div class="section-header"><div class="section-title">Invite a Member</div></div>
+      <div class="card card-pad">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px;font-family:var(--font-body);">Share the family code with anyone you want to add</p>
+        <div class="code-box" id="family-invite-code" style="font-size:22px;padding:12px 20px;margin-bottom:8px;">ABC789</div>
+        <button class="btn-secondary" style="margin-top:8px;font-size:14px;padding:12px;" onclick="copyFamilyCode()">📋 Copy Code</button>
+        <!-- Fix #9: Generate new code -->
+        <button class="gen-code-btn" onclick="generateNewCode()">🔄 Generate New Code</button>
+      </div>
+    </div>
+    <div class="nav-bar" id="nav-family">
+      <div class="nav-item" onclick="navTo('s-dashboard',this,'nav-family')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home<div class="nav-dot"></div></div>
+      <div class="nav-item" onclick="navTo('s-analytics',this,'nav-family')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Budget<div class="nav-dot"></div></div>
+      <div class="nav-item active" onclick="navTo('s-family',this,'nav-family')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Family<div class="nav-dot"></div></div>
+      <div class="nav-item" onclick="navTo('s-settings',this,'nav-family')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>Settings<div class="nav-dot"></div></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 10: ANALYTICS -->
+  <div class="screen" id="s-analytics">
+    <div class="screen-scroll">
+      <div class="page-header"><div><div class="page-title">Budget</div><div class="page-sub">April 2025 breakdown</div></div></div>
+      <div class="budget-card" style="background:linear-gradient(135deg,#10b981,#059669)">
+        <div class="budget-label">Monthly Budget</div>
+        <div class="budget-amount" id="analytics-budget">500 <span>JOD</span></div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span id="analytics-spent-lbl">420 JOD spent</span><span id="analytics-left-lbl">80 JOD left</span></div>
+          <div class="progress-track"><div class="progress-fill" id="analytics-fill" style="width:84%;background:#fef9c3"></div></div>
+        </div>
+      </div>
+      <div class="section-header"><div class="section-title">By Category</div></div>
+      <div class="card card-pad"><div id="cat-breakdown"></div></div>
+      <div class="section-header"><div class="section-title">Weekly Trend</div></div>
+      <div class="card card-pad">
+        <div style="display:flex;align-items:flex-end;gap:8px;height:80px;padding:4px 0;">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="flex:1;width:100%;background:#e0e7ff;border-radius:4px 4px 0 0;height:40%;"></div><div style="font-size:10px;color:var(--muted);font-family:var(--font);">Mon</div></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="flex:1;width:100%;background:#c7d2fe;border-radius:4px 4px 0 0;height:60%;"></div><div style="font-size:10px;color:var(--muted);font-family:var(--font);">Tue</div></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="flex:1;width:100%;background:#a5b4fc;border-radius:4px 4px 0 0;height:35%;"></div><div style="font-size:10px;color:var(--muted);font-family:var(--font);">Wed</div></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="flex:1;width:100%;background:#818cf8;border-radius:4px 4px 0 0;height:80%;"></div><div style="font-size:10px;color:var(--muted);font-family:var(--font);">Thu</div></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="flex:1;width:100%;background:#6366f1;border-radius:4px 4px 0 0;height:100%;"></div><div style="font-size:10px;color:var(--muted);font-family:var(--font);">Fri</div></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="flex:1;width:100%;background:#a5b4fc;border-radius:4px 4px 0 0;height:55%;"></div><div style="font-size:10px;color:var(--muted);font-family:var(--font);">Sat</div></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="flex:1;width:100%;background:#e0e7ff;border-radius:4px 4px 0 0;height:30%;"></div><div style="font-size:10px;color:var(--muted);font-family:var(--font);">Sun</div></div>
+        </div>
+        <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px;font-family:var(--font);">Highest spending day: Thursday</p>
+      </div>
+    </div>
+    <div class="nav-bar" id="nav-analytics">
+      <div class="nav-item" onclick="navTo('s-dashboard',this,'nav-analytics')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home<div class="nav-dot"></div></div>
+      <div class="nav-item active" onclick="navTo('s-analytics',this,'nav-analytics')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Budget<div class="nav-dot"></div></div>
+      <div class="nav-item" onclick="navTo('s-family',this,'nav-analytics')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Family<div class="nav-dot"></div></div>
+      <div class="nav-item" onclick="navTo('s-settings',this,'nav-analytics')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>Settings<div class="nav-dot"></div></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 11: SETTINGS -->
+  <div class="screen" id="s-settings">
+    <div class="screen-scroll">
+      <div class="page-header"><div class="page-title">Settings</div></div>
+
+      <div class="card card-pad" style="margin-bottom:12px;">
+        <p style="font-size:11px;color:var(--muted);font-family:var(--font);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:12px;">Account</p>
+        <div style="display:flex;align-items:center;gap:12px;padding-bottom:14px;border-bottom:1px solid var(--border);">
+          <div id="settings-avatar" style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#5c6ef8,#818cf8);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;font-family:var(--font);">A</div>
+          <div>
+            <div id="settings-name" style="font-family:var(--font);font-weight:600;font-size:15px;">Ahmad</div>
+            <div id="settings-role" style="font-size:12px;color:var(--muted);">Admin · Al-Younis Family</div>
+          </div>
+        </div>
+        <div style="padding-top:12px;font-family:var(--font);font-size:14px;color:var(--primary);cursor:pointer;">Edit Profile</div>
+      </div>
+
+      <div class="card card-pad" style="margin-bottom:12px;">
+        <p style="font-size:11px;color:var(--muted);font-family:var(--font);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:12px;">Preferences</p>
+        <div class="settings-row"><span>Currency</span><span class="settings-val">JOD 🇯🇴</span></div>
+        <div class="settings-row"><span>Notifications</span><span class="settings-val" style="color:var(--success);">On ✓</span></div>
+        <div class="settings-row"><span>Budget Warnings</span><span class="settings-val" style="color:var(--success);">On ✓</span></div>
+        <!-- Fix #12: Dark mode toggle -->
+        <div class="settings-row">
+          <span>🌙 Dark Mode</span>
+          <button class="toggle-switch" id="dark-toggle" onclick="toggleDarkMode(this)"><div class="toggle-knob"></div></button>
+        </div>
+      </div>
+
+      <!-- Fix #11: Chart type selector -->
+      <div class="card card-pad" style="margin-bottom:12px;">
+        <p style="font-size:11px;color:var(--muted);font-family:var(--font);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px;">Breakdown Chart Style</p>
+        <p style="font-size:12px;color:var(--muted);font-family:var(--font-body);margin-bottom:10px;">Choose how the spending breakdown looks on the Home page.</p>
+        <div class="chart-toggle">
+          <button class="chart-toggle-btn active" onclick="setChartType('pie',this)">🥧 Pie Chart</button>
+          <button class="chart-toggle-btn" onclick="setChartType('donut',this)">🍩 Donut</button>
+          <button class="chart-toggle-btn" onclick="setChartType('bar',this)">📊 Bar Chart</button>
+        </div>
+      </div>
+
+      <button class="btn-secondary" onclick="goto('s-welcome')" style="margin-top:16px;color:var(--danger);border-color:#fca5a5;">Leave Family</button>
+    </div>
+    <div class="nav-bar" id="nav-settings">
+      <div class="nav-item" onclick="navTo('s-dashboard',this,'nav-settings')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home<div class="nav-dot"></div></div>
+      <div class="nav-item" onclick="navTo('s-analytics',this,'nav-settings')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Budget<div class="nav-dot"></div></div>
+      <div class="nav-item" onclick="navTo('s-family',this,'nav-settings')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Family<div class="nav-dot"></div></div>
+      <div class="nav-item active" onclick="navTo('s-settings',this,'nav-settings')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>Settings<div class="nav-dot"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════
+// APP STATE
+// ══════════════════════════════════════
+const appState = {
+  isAdmin: true,
+  userName: 'Ahmad',
+  familyName: 'Al-Younis Family',
+  familyCode: 'ABC789',
+  budget: 500,
+  spent: 420,
+  chartType: 'pie',
+  pendingReceiptDataUrl: null,
+};
+
+let expenses = [
+  { id:1,  name:'Ahmad', initial:'A', color:'#ecfdf5', textColor:'#065f46', amount:50,  cat:'Food',      catStyle:'background:#fef3c7;color:#92400e;', emoji:'🍔', time:'Today, 12:30 PM', note:'',             receiptUrl:null },
+  { id:2,  name:'Sara',  initial:'S', color:'#f5f3ff', textColor:'#4338ca', amount:20,  cat:'Transport', catStyle:'background:#e0e7ff;color:#3730a3;', emoji:'🚗', time:'Today, 9:00 AM',   note:'Bus fare',     receiptUrl:null },
+  { id:3,  name:'Ahmad', initial:'A', color:'#ecfdf5', textColor:'#065f46', amount:100, cat:'Bills',     catStyle:'background:#f5f3ff;color:#5b21b6;', emoji:'💡', time:'Yesterday',         note:'Electricity',  receiptUrl:null },
+  { id:4,  name:'Younis',initial:'Y', color:'#fff7ed', textColor:'#c2410c', amount:35,  cat:'Food',      catStyle:'background:#fef3c7;color:#92400e;', emoji:'🍔', time:'Yesterday',         note:'',             receiptUrl:null },
+  { id:5,  name:'Lina',  initial:'L', color:'#ecfdf5', textColor:'#065f46', amount:30,  cat:'Shopping',  catStyle:'background:#fce7f3;color:#9d174d;', emoji:'🛍️',time:'2 days ago',        note:'Clothes',      receiptUrl:null },
+  { id:6,  name:'Ahmad', initial:'A', color:'#ecfdf5', textColor:'#065f46', amount:50,  cat:'Bills',     catStyle:'background:#f5f3ff;color:#5b21b6;', emoji:'💡', time:'3 days ago',        note:'',             receiptUrl:null },
+  { id:7,  name:'Sara',  initial:'S', color:'#f5f3ff', textColor:'#4338ca', amount:45,  cat:'Food',      catStyle:'background:#fef3c7;color:#92400e;', emoji:'🍔', time:'4 days ago',        note:'',             receiptUrl:null },
+  { id:8,  name:'Younis',initial:'Y', color:'#fff7ed', textColor:'#c2410c', amount:35,  cat:'Transport', catStyle:'background:#e0e7ff;color:#3730a3;', emoji:'🚗', time:'4 days ago',        note:'Taxi',         receiptUrl:null },
+  { id:9,  name:'Ahmad', initial:'A', color:'#ecfdf5', textColor:'#065f46', amount:60,  cat:'Food',      catStyle:'background:#fef3c7;color:#92400e;', emoji:'🍔', time:'5 days ago',        note:'',             receiptUrl:null },
+  { id:10, name:'Sara',  initial:'S', color:'#f5f3ff', textColor:'#4338ca', amount:25,  cat:'Health',    catStyle:'background:#ecfdf5;color:#065f46;', emoji:'🏥', time:'6 days ago',        note:'Pharmacy',     receiptUrl:null },
+];
+
+const catColors = {
+  'Food':{'color':'#f59e0b','bg':'#fef3c7','style':'background:#fef3c7;color:#92400e;','emoji':'🍔'},
+  'Transport':{'color':'#5c6ef8','bg':'#e0e7ff','style':'background:#e0e7ff;color:#3730a3;','emoji':'🚗'},
+  'Bills':{'color':'#8b5cf6','bg':'#f5f3ff','style':'background:#f5f3ff;color:#5b21b6;','emoji':'💡'},
+  'Health':{'color':'#10b981','bg':'#ecfdf5','style':'background:#ecfdf5;color:#065f46;','emoji':'🏥'},
+  'Education':{'color':'#3b82f6','bg':'#dbeafe','style':'background:#dbeafe;color:#1e40af;','emoji':'📚'},
+  'Shopping':{'color':'#ec4899','bg':'#fce7f3','style':'background:#fce7f3;color:#9d174d;','emoji':'🛍️'},
+  'Entertainment':{'color':'#6366f1','bg':'#e0e7ff','style':'background:#e0e7ff;color:#3730a3;','emoji':'🎮'},
+  'Travel':{'color':'#0ea5e9','bg':'#e0f2fe','style':'background:#e0f2fe;color:#075985;','emoji':'✈️'},
+  'Rent':{'color':'#78716c','bg':'#f5f5f4','style':'background:#f5f5f4;color:#44403c;','emoji':'🏠'},
+  'Groceries':{'color':'#16a34a','bg':'#dcfce7','style':'background:#dcfce7;color:#166534;','emoji':'🛒'},
+  'Clothing':{'color':'#db2777','bg':'#fdf2f8','style':'background:#fdf2f8;color:#9d174d;','emoji':'👕'},
+  'Subscriptions':{'color':'#7c3aed','bg':'#ede9fe','style':'background:#ede9fe;color:#5b21b6;','emoji':'📱'},
+  'Savings':{'color':'#0891b2','bg':'#e0f2fe','style':'background:#e0f2fe;color:#0c4a6e;','emoji':'🏦'},
+  'Gifts':{'color':'#f43f5e','bg':'#ffe4e6','style':'background:#ffe4e6;color:#9f1239;','emoji':'🎁'},
+  'Other':{'color':'#9ca3af','bg':'#f3f4f6','style':'background:#f3f4f6;color:#374151;','emoji':'➕'},
+};
+const defCC = {'color':'#9ca3af','bg':'#f3f4f6','style':'background:#f3f4f6;color:#374151;','emoji':'🏷️'};
+
+// ══════════════════════════════════════
+// FIX #6: NAVIGATION — each nav bar has its own ID
+// ══════════════════════════════════════
+function goto(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+  const scroll = document.querySelector('#' + screenId + ' .screen-scroll');
+  if (scroll) scroll.scrollTop = 0;
+}
+
+function navTo(screenId, el, navId) {
+  const navBar = document.getElementById(navId);
+  navBar.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  goto(screenId);
+}
+
+// FIX #5: toggleCat — toggle immediately, no side effects
+function toggleCat(el) {
+  el.classList.toggle('selected');
+}
+
+// FIX #4: Add custom category
+function addCustomCategory() {
+  const emojiIn = document.getElementById('custom-cat-emoji');
+  const nameIn  = document.getElementById('custom-cat-name');
+  const emoji   = emojiIn.value.trim() || '🏷️';
+  const name    = nameIn.value.trim();
+  if (!name) { showToast('Enter a category name', '#ef4444'); return; }
+  const grid = document.getElementById('cat-grid');
+  const item = document.createElement('div');
+  item.className = 'cat-item selected';
+  item.setAttribute('data-cat', name);
+  item.setAttribute('onclick', 'toggleCat(this)');
+  item.innerHTML = `<div class="cat-emoji">${emoji}</div><div class="cat-name">${name}</div>`;
+  grid.appendChild(item);
+  catColors[name] = { color:'#9ca3af', bg:'#f3f4f6', style:'background:#f3f4f6;color:#374151;', emoji };
+  const opt = document.createElement('option');
+  opt.textContent = `${emoji} ${name}`;
+  document.getElementById('exp-type').appendChild(opt);
+  emojiIn.value = ''; nameIn.value = '';
+  showToast('"' + name + '" added!', '#10b981');
+}
+
+// FIX #3: Random code generator
+function generateCode() {
+  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length:6}, () => c[Math.floor(Math.random()*c.length)]).join('');
+}
+
+// FIX #1: Create family — reads fields and updates all UI
+function goToCategories() {
+  const n = document.getElementById('creator-name').value.trim();
+  const f = document.getElementById('family-name-input').value.trim();
+  const b = parseFloat(document.getElementById('family-budget-input').value);
+  if (!n || !f || !b) { showToast('Please fill in all fields', '#ef4444'); return; }
+  goto('s-categories');
+}
+
+function createFamily() {
+  const name   = document.getElementById('creator-name').value.trim() || 'You';
+  const family = document.getElementById('family-name-input').value.trim() || 'My Family';
+  const budget = parseFloat(document.getElementById('family-budget-input').value) || 500;
+  const code   = generateCode();
+  appState.isAdmin = true; appState.userName = name;
+  appState.familyName = family; appState.familyCode = code;
+  appState.budget = budget; appState.spent = 0;
+  expenses = [];
+  document.getElementById('success-msg').textContent = family + ' created! Share the code below with your family.';
+  document.getElementById('success-code').textContent = code;
+  updateAllUI();
+  goto('s-success');
+}
+
+// FIX #2: Join family — shows entered code
+function joinFamily() {
+  const name = document.getElementById('joiner-name').value.trim();
+  const code = document.getElementById('join-code').value.trim().toUpperCase();
+  if (!name || !code) { showToast('Please fill in all fields', '#ef4444'); return; }
+  appState.isAdmin = false; appState.userName = name;
+  appState.familyCode = code; appState.familyName = 'Family · ' + code;
+  document.getElementById('success-msg').textContent = 'You joined using code: ' + code;
+  document.getElementById('success-code').textContent = code;
+  updateAllUI();
+  goto('s-success');
+}
+
+// FIX #1 #2 #10: Update all dynamic UI from appState
+function updateAllUI() {
+  const { userName, familyName, familyCode, budget, spent, isAdmin } = appState;
+  const left = budget - spent;
+  const over = left < 0;
+  const pct  = Math.min(100, Math.round(spent / budget * 100));
+
+  // Dashboard avatar & budget card
+  document.getElementById('dash-avatar').textContent = userName[0].toUpperCase();
+  document.getElementById('budget-amount').innerHTML = budget + ' <span>JOD</span>';
+  document.getElementById('budget-total-lbl').textContent = budget + ' JOD';
+  document.getElementById('chip-spent').textContent = 'Spent: ' + spent + ' JOD';
+  document.getElementById('chip-left').textContent  = over ? 'Over: ' + Math.abs(left) + ' JOD' : 'Left: ' + left + ' JOD';
+  document.getElementById('pct-lbl').textContent    = pct + '% used';
+  document.getElementById('progress-fill').style.width = pct + '%';
+  const wp = document.getElementById('warn-pill');
+  if (over) { wp.textContent = '🚨 Budget exceeded!'; wp.className = 'overspent-pill'; }
+  else { wp.textContent = '⚠️ Only ' + left + ' JOD remaining'; wp.className = 'warn-pill'; }
+
+  // Analytics page
+  document.getElementById('analytics-budget').innerHTML = budget + ' <span>JOD</span>';
+  document.getElementById('analytics-spent-lbl').textContent = spent + ' JOD spent';
+  document.getElementById('analytics-left-lbl').textContent  = over ? Math.abs(left) + ' JOD over' : left + ' JOD left';
+  document.getElementById('analytics-fill').style.width = pct + '%';
+
+  // Family page
+  document.getElementById('family-page-title').textContent = familyName;
+  document.getElementById('family-page-sub').textContent   = 'Code: ' + familyCode;
+  document.getElementById('family-invite-code').textContent = familyCode;
+  document.getElementById('fam-m1-name').textContent = userName;
+  document.getElementById('fam-m1-av').textContent   = userName[0].toUpperCase();
+  document.getElementById('fam-m1-role').textContent = (isAdmin ? 'Admin' : 'Member') + ' · ' + expenses.filter(e=>e.name===userName).length + ' expenses';
+
+  // Settings
+  document.getElementById('settings-avatar').textContent = userName[0].toUpperCase();
+  document.getElementById('settings-name').textContent   = userName;
+  document.getElementById('settings-role').textContent   = (isAdmin ? 'Admin' : 'Member') + ' · ' + familyName;
+
+  // Paid-by dropdown
+  const pb = document.getElementById('exp-paid-by');
+  pb.innerHTML = '';
+  [userName, 'Sara', 'Younis', 'Lina'].forEach(m => {
+    if (!pb.querySelector('option[value="'+m+'"]')) { const o=document.createElement('option'); o.value=o.textContent=m; pb.appendChild(o); }
+  });
+
+  updateTopSpender();
+  renderBreakdown();
+  renderRecentExpenses();
+  renderAllExpenses();
+  renderCatBreakdown();
+}
+
+function updateTopSpender() {
+  const totals = {};
+  expenses.forEach(e => { totals[e.name] = (totals[e.name]||0) + e.amount; });
+  const sorted = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+  if (!sorted.length) return;
+  const [n, a] = sorted[0];
+  document.getElementById('top-name').textContent   = n;
+  document.getElementById('top-amount').textContent = a + ' JOD';
+  document.getElementById('top-avatar').textContent = n[0].toUpperCase();
+}
+
+// FIX #8: Save expense and update dashboard live
+function saveExpense() {
+  const title   = document.getElementById('exp-title').value.trim();
+  const amount  = parseFloat(document.getElementById('exp-amount').value);
+  const typeRaw = document.getElementById('exp-type').value;
+  const paidBy  = document.getElementById('exp-paid-by').value;
+  const note    = document.getElementById('exp-note').value.trim();
+  const receipt = appState.pendingReceiptDataUrl;
+  if (!title || !amount || amount <= 0) { showToast('Fill in title and amount', '#ef4444'); return; }
+
+  const parts   = typeRaw.split(' ');
+  const emoji   = parts[0];
+  const catName = parts.slice(1).join(' ');
+  const cc      = catColors[catName] || defCC;
+  const mCol = {'Ahmad':'#ecfdf5','Sara':'#f5f3ff','Younis':'#fff7ed','Lina':'#ecfdf5'};
+  const mTxt = {'Ahmad':'#065f46','Sara':'#4338ca','Younis':'#c2410c','Lina':'#065f46'};
+
+  expenses.unshift({ id:Date.now(), name:paidBy, initial:paidBy[0].toUpperCase(),
+    color:mCol[paidBy]||'#f3f4f6', textColor:mTxt[paidBy]||'#374151',
+    amount, cat:catName, catStyle:cc.style, emoji, time:'Just now', note, receiptUrl:receipt });
+  appState.spent += amount;
+  appState.pendingReceiptDataUrl = null;
+
+  // Reset form
+  document.getElementById('exp-title').value = '';
+  document.getElementById('exp-amount').value = '';
+  document.getElementById('exp-note').value = '';
+  resetImageUpload();
+
+  updateAllUI();
+  goto('s-dashboard');
+  showToast('✓ ' + title + ' — ' + amount + ' JOD saved!', '#10b981');
+}
+
+// FIX #14: File input handler
+function handleFileInput(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    appState.pendingReceiptDataUrl = e.target.result;
+    document.getElementById('img-upload-area').innerHTML =
+      '<div class="img-preview-wrap"><img src="'+e.target.result+'" alt="Receipt"/><button class="img-remove" onclick="resetImageUpload()">✕</button></div>';
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function resetImageUpload() {
+  appState.pendingReceiptDataUrl = null;
+  document.getElementById('img-upload-area').innerHTML =
+    '<div class="img-upload-options">' +
+    '<div class="img-upload-btn" onclick="document.getElementById(\'file-gallery\').click()"><div class="img-upload-icon">🖼️</div>Gallery / File</div>' +
+    '<div class="img-upload-btn" onclick="document.getElementById(\'file-camera\').click()"><div class="img-upload-icon">📷</div>Camera</div>' +
+    '</div>';
+}
+
+// FIX #8 + #13: Render recent (3 items, no expand) and all (with expand)
+function renderRecentExpenses() {
+  const card = document.getElementById('recent-list');
+  const recent = expenses.slice(0, 3);
+  card.innerHTML = recent.length
+    ? recent.map(e => expItemHTML(e, false)).join('')
+    : '<p style="text-align:center;color:var(--muted);font-size:13px;padding:16px 0;">No expenses yet</p>';
+}
+
+function renderAllExpenses() {
+  const el = document.getElementById('all-expense-list');
+  const sub = document.getElementById('all-exp-sub');
+  if (sub) sub.textContent = 'April 2025 • ' + expenses.length + ' transactions';
+  el.innerHTML = expenses.length
+    ? expenses.map(e => expItemHTML(e, true)).join('')
+    : '<p style="text-align:center;color:var(--muted);font-size:13px;padding:16px 0;">No expenses yet</p>';
+}
+
+function expItemHTML(e, expandable) {
+  const hasExtra = e.note || e.receiptUrl;
+  const btn = (expandable && hasExtra)
+    ? '<button class="exp-expand-btn" onclick="toggleExpand(this,'+e.id+')">▾</button>' : '';
+  const detail = (expandable && hasExtra)
+    ? '<div class="exp-detail-row" id="detail-'+e.id+'">'
+      + (e.note ? '<span>📝 ' + e.note + '</span>' : '')
+      + (e.receiptUrl ? '<img class="exp-detail-img" src="'+e.receiptUrl+'" alt="Receipt"/>' : '')
+      + '</div>' : '';
+  return '<div style="border-bottom:1px solid var(--border);">'
+    + '<div class="expense-item" style="border-bottom:none;">'
+    + '<div class="exp-avatar" style="background:'+e.color+';color:'+e.textColor+';">'+e.initial+'</div>'
+    + '<div class="exp-info"><div class="exp-name">'+e.name+'</div><div class="exp-meta">'+e.time+'</div></div>'
+    + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">'
+    + '<div class="exp-amount">'+e.amount+' JOD</div>'
+    + '<div class="exp-cat" style="'+e.catStyle+'">'+e.emoji+' '+e.cat+'</div></div>'
+    + btn + '</div>' + detail + '</div>';
+}
+
+function toggleExpand(btn, id) {
+  const d = document.getElementById('detail-'+id);
+  if (!d) return;
+  d.classList.toggle('open');
+  btn.classList.toggle('open');
+}
+
+// FIX #8 + #11: Breakdown chart rendering
+function computeBreakdown() {
+  const totals = {}; let total = 0;
+  expenses.forEach(e => { totals[e.cat] = (totals[e.cat]||0) + e.amount; total += e.amount; });
+  if (!total) return [{ name:'Food', pct:45, color:'#f59e0b', bg:'#fef3c7', emoji:'🍔', amount:0 }];
+  return Object.entries(totals).sort((a,b)=>b[1]-a[1]).map(([n, a]) => {
+    const cc = catColors[n] || defCC;
+    return { name:n, pct:Math.round(a/total*100), color:cc.color, bg:cc.bg, emoji:cc.emoji, amount:a };
+  });
+}
+
+function renderBreakdown() {
+  const card = document.getElementById('breakdown-card');
+  if (!card) return;
+  const data = computeBreakdown();
+  if (appState.chartType === 'bar') { card.innerHTML = buildBarChart(data); return; }
+  const isDonut = appState.chartType === 'donut';
+  const pct = Math.min(100, Math.round(appState.spent/appState.budget*100));
+  let offset = 0;
+  const circles = data.map(c => {
+    const d = c.pct + ' ' + (100-c.pct); const o = -offset; offset += c.pct;
+    return '<circle cx="18" cy="18" r="15.915" fill="transparent" stroke="'+c.color+'" stroke-width="'+(isDonut?4:6)+'" stroke-dasharray="'+d+'" stroke-dashoffset="'+o+'"/>';
+  }).join('');
+  const legend = data.map(c =>
+    '<div class="legend-item"><div class="legend-dot" style="background:'+c.color+'"></div>'
+    +'<div class="legend-name">'+c.name+'</div>'
+    +'<div class="legend-bar"><div class="legend-bar-fill" style="width:'+c.pct+'%;background:'+c.color+'"></div></div>'
+    +'<div class="legend-pct">'+c.pct+'%</div></div>').join('');
+  card.innerHTML = '<div class="chart-wrap"><div class="pie-container"><svg viewBox="0 0 36 36">'+circles+'</svg>'
+    +'<div class="pie-center"><div class="pie-center-val">'+pct+'%</div><div class="pie-center-lbl">used</div></div>'
+    +'</div><div class="legend">'+legend+'</div></div>';
+}
+
+function buildBarChart(data) {
+  const max = Math.max(...data.map(c=>c.pct), 1);
+  const bars = data.map(c =>
+    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;">'
+    +'<div style="font-size:10px;color:var(--muted);font-family:var(--font);font-weight:600;">'+c.pct+'%</div>'
+    +'<div style="flex:1;width:80%;border-radius:6px 6px 0 0;background:'+c.color+';min-height:4px;height:'+Math.round(c.pct/max*70)+'px;"></div>'
+    +'<div style="font-size:9px;color:var(--muted);font-family:var(--font);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;">'+c.emoji+'<br>'+c.name+'</div>'
+    +'</div>').join('');
+  return '<div style="display:flex;align-items:flex-end;gap:6px;height:120px;padding:4px 0 0;">'+bars+'</div>';
+}
+
+function renderCatBreakdown() {
+  const el = document.getElementById('cat-breakdown');
+  if (!el) return;
+  const data = computeBreakdown();
+  el.innerHTML = data.map(c =>
+    '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">'
+    +'<div style="width:36px;height:36px;border-radius:10px;background:'+c.bg+';display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">'+c.emoji+'</div>'
+    +'<div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:5px;">'
+    +'<span style="font-family:var(--font);font-size:13px;font-weight:600;">'+c.name+'</span>'
+    +'<span style="font-family:var(--font);font-size:13px;font-weight:700;">'+c.amount+' JOD</span></div>'
+    +'<div style="height:5px;background:var(--border);border-radius:99px;overflow:hidden;">'
+    +'<div style="height:100%;width:'+c.pct+'%;background:'+c.color+';border-radius:99px;"></div></div></div>'
+    +'<div style="font-size:12px;color:var(--muted);font-family:var(--font);width:32px;text-align:right;">'+c.pct+'%</div></div>'
+  ).join('');
+}
+
+// FIX #11: Chart type setting
+function setChartType(type, btn) {
+  appState.chartType = type;
+  document.querySelectorAll('.chart-toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBreakdown();
+  showToast('Chart style updated!', '#5c6ef8');
+}
+
+// FIX #12: Dark mode
+function toggleDarkMode(btn) {
+  btn.classList.toggle('on');
+  document.body.classList.toggle('dark-mode');
+}
+
+// FIX #9: Family code actions
+function copyFamilyCode() {
+  const code = appState.familyCode;
+  if (navigator.clipboard) navigator.clipboard.writeText(code).then(() => showToast('Code copied!', '#10b981'));
+  else showToast('Code: ' + code, '#10b981');
+}
+
+function generateNewCode() {
+  const code = generateCode();
+  appState.familyCode = code;
+  document.getElementById('family-invite-code').textContent = code;
+  document.getElementById('family-page-sub').textContent = 'Code: ' + code;
+  showToast('New code: ' + code, '#5c6ef8');
+}
+
+function showToast(msg, color) {
+  color = color || '#10b981';
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:'+color+';color:#fff;padding:10px 22px;border-radius:99px;font-family:Sora,sans-serif;font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.25);z-index:9999;animation:fadeInUp .3s ease;white-space:nowrap;';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// Init
+updateAllUI();
+const s = document.createElement('style');
+s.textContent = '@keyframes fadeInUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}';
+document.head.appendChild(s);
+</script>
+</body>
+</html>
