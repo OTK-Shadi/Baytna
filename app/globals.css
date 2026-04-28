@@ -12,17 +12,41 @@ body {
 }
 
 .card {
-  @apply rounded-2xl bg-white/90 backdrop-blur-md shadow-soft border border-sky-100;
+  @apply rounded-2xl border border-slate-200 bg-white shadow-soft;
 }
 
 .input {
-  @apply w-full rounded-2xl border border-sky-200 bg-white px-4 py-3 text-navy outline-none ring-sky-300 transition focus:ring-2;
+  @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none ring-indigo-200 transition focus:ring-2;
 }
 
 .btn-primary {
-  @apply rounded-2xl bg-gradient-to-r from-blue-600 to-sky-400 px-4 py-3 font-semibold text-white shadow-soft transition hover:brightness-105;
+  @apply rounded-xl bg-indigo-500 px-4 py-3 font-semibold text-white transition hover:bg-indigo-600;
 }
 
 .btn-secondary {
-  @apply rounded-2xl border border-sky-300 bg-white px-4 py-3 font-semibold text-sky-700 transition hover:bg-sky-50;
+  @apply rounded-xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-50;
+}
+
+.category-tile {
+  @apply flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-4 text-slate-700 shadow-sm transition;
+}
+
+.category-tile:hover {
+  @apply border-indigo-300 bg-indigo-50/50;
+}
+
+.category-tile-selected {
+  @apply border-indigo-500 bg-indigo-50 text-indigo-700;
+}
+
+.settings-row {
+  @apply flex items-center justify-between border-b border-slate-200 py-3;
+}
+
+.settings-row:last-child {
+  @apply border-b-0;
+}
+
+.settings-val {
+  @apply text-sm text-slate-500;
 }

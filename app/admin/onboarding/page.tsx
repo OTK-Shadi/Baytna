@@ -3,8 +3,25 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AppShell from '@/components/AppShell';
-import { DEFAULT_CATEGORIES } from '@/lib/constants';
 import { useFamilyData } from '@/hooks/useFamilyData';
+
+const CATEGORY_TEMPLATES = [
+  { name: 'الطعام', emoji: '🍔', limit: 2500 },
+  { name: 'المواصلات', emoji: '🚗', limit: 1200 },
+  { name: 'الفواتير', emoji: '💡', limit: 1000 },
+  { name: 'الصحة', emoji: '🏥', limit: 1000 },
+  { name: 'التعليم', emoji: '📚', limit: 1500 },
+  { name: 'التسوق', emoji: '🛍️', limit: 1200 },
+  { name: 'الترفيه', emoji: '🎮', limit: 800 },
+  { name: 'السفر', emoji: '✈️', limit: 1800 },
+  { name: 'الإيجار', emoji: '🏠', limit: 5000 },
+  { name: 'البقالة', emoji: '🛒', limit: 2200 },
+  { name: 'الملابس', emoji: '👕', limit: 900 },
+  { name: 'الاشتراكات', emoji: '📱', limit: 600 },
+  { name: 'الادخار', emoji: '🏦', limit: 1200 },
+  { name: 'الهدايا', emoji: '🎁', limit: 500 },
+  { name: 'أخرى', emoji: '➕', limit: 500 },
+];
 
 export default function AdminOnboardingPage() {
   const router = useRouter();
@@ -14,11 +31,22 @@ export default function AdminOnboardingPage() {
   const [familyName, setFamilyName] = useState('');
   const [monthlyBudget, setMonthlyBudget] = useState(12000);
   const [customCategory, setCustomCategory] = useState('');
-  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+  const [customEmoji, setCustomEmoji] = useState('');
+  const [categories, setCategories] = useState(CATEGORY_TEMPLATES);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    CATEGORY_TEMPLATES.slice(0, 3).map((c) => c.name),
+  );
   const [inviteCode, setInviteCode] = useState('');
 
   const canStep1 = adminName.trim() && familyName.trim() && monthlyBudget > 0;
-  const canCreate = useMemo(() => categories.length > 0 && categories.every((c) => c.name.trim() && c.limit > 0), [categories]);
+  const chosenCategories = useMemo(
+    () => categories.filter((c) => selectedCategories.includes(c.name)),
+    [categories, selectedCategories],
+  );
+  const canCreate = useMemo(
+    () => chosenCategories.length > 0 && chosenCategories.every((c) => c.name.trim() && c.limit > 0),
+    [chosenCategories],
+  );
 
   if (!ready) return null;
 
@@ -28,8 +56,24 @@ export default function AdminOnboardingPage() {
 
   const addCustom = () => {
     if (!customCategory.trim()) return;
-    setCategories((prev) => [...prev, { name: customCategory.trim(), limit: 500 }]);
+    const nextName = customCategory.trim();
+    if (categories.some((category) => category.name === nextName)) return;
+
+    const nextCategory = {
+      name: nextName,
+      emoji: customEmoji.trim() || '😀',
+      limit: 500,
+    };
+    setCategories((prev) => [...prev, nextCategory]);
+    setSelectedCategories((prev) => [...prev, nextName]);
     setCustomCategory('');
+    setCustomEmoji('');
+  };
+
+  const toggleCategory = (name: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(name) ? prev.filter((catName) => catName !== name) : [...prev, name],
+    );
   };
 
   const handleCreate = () => {
@@ -37,7 +81,7 @@ export default function AdminOnboardingPage() {
       adminName,
       familyName,
       monthlyBudget,
-      categories,
+      categories: chosenCategories,
     });
     setInviteCode(family.inviteCode);
     setStep(3);
@@ -68,18 +112,49 @@ export default function AdminOnboardingPage() {
 
         {step === 2 && (
           <div className="mt-6 space-y-4">
-            {categories.map((cat, idx) => (
-              <div key={`${cat.name}-${idx}`} className="grid grid-cols-1 gap-3 rounded-2xl bg-sky-50 p-4 md:grid-cols-2">
-                <input className="input" value={cat.name} readOnly />
-                <input className="input" type="number" value={cat.limit} onChange={(e) => updateLimit(idx, Number(e.target.value))} />
-              </div>
-            ))}
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+              {categories.map((cat, idx) => (
+                <div
+                  key={`${cat.name}-${idx}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => toggleCategory(cat.name)}
+                  onKeyDown={(e) => e.key === 'Enter' && toggleCategory(cat.name)}
+                  className={`category-tile ${selectedCategories.includes(cat.name) ? 'category-tile-selected' : ''}`}
+                >
+                  <span className="text-3xl">{cat.emoji}</span>
+                  <span className="font-semibold">{cat.name}</span>
+                </div>
+              ))}
+            </div>
 
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto]">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">إضافة فئة مخصصة</p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[84px_1fr_auto]">
+              <input className="input text-center" placeholder="😀" value={customEmoji} maxLength={2} onChange={(e) => setCustomEmoji(e.target.value)} />
               <input className="input" placeholder="إضافة فئة مخصصة" value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} />
               <button className="btn-secondary" onClick={addCustom}>
                 إضافة
               </button>
+            </div>
+
+            <div className="space-y-2 rounded-2xl border border-sky-100 bg-sky-50/70 p-4">
+              <p className="text-sm font-semibold text-slate-700">حدود الميزانية للفئات المختارة</p>
+              {chosenCategories.map((cat) => {
+                const index = categories.findIndex((item) => item.name === cat.name);
+                return (
+                  <div key={cat.name} className="grid grid-cols-[1fr_auto] items-center gap-2 rounded-xl bg-white p-2">
+                    <p className="text-sm font-medium text-slate-700">
+                      {cat.emoji} {cat.name}
+                    </p>
+                    <input
+                      className="w-28 rounded-xl border border-sky-200 bg-white px-3 py-2 text-sm outline-none ring-sky-300 transition focus:ring-2"
+                      type="number"
+                      value={cat.limit}
+                      onChange={(e) => updateLimit(index, Number(e.target.value))}
+                    />
+                  </div>
+                );
+              })}
             </div>
 
             <div className="flex gap-3">
