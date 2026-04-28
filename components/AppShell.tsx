@@ -3,11 +3,11 @@ import { BarChart3, Home, PlusCircle, Settings, UsersRound, Wallet } from 'lucid
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-screen bg-slate-100 p-4 md:p-8">
-      <div className="mx-auto w-full max-w-[420px] space-y-4 rounded-[36px] border border-slate-200 bg-white p-4 shadow-2xl">
-        <nav className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4">
-          <h1 className="text-lg font-bold text-slate-900">FamilyLedger</h1>
-          <div className="flex flex-wrap gap-2 text-sm">
+    <main className="min-h-screen bg-slate-100 p-4 md:p-6 lg:p-8">
+      <div className="mx-auto w-full max-w-[420px] space-y-4 rounded-[36px] border border-slate-200 bg-white p-4 shadow-2xl md:max-w-4xl md:rounded-3xl md:p-6 lg:max-w-7xl lg:p-8">
+        <nav className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:justify-between">
+          <h1 className="text-lg font-bold text-slate-900 md:text-xl">FamilyLedger</h1>
+          <div className="flex flex-wrap gap-2 text-sm md:ms-auto">
             <Link className="btn-secondary flex items-center gap-2 py-2" href="/">
               <Home size={16} /> الرئيسية
             </Link>

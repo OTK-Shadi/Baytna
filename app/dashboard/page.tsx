@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import AppShell from '@/components/AppShell';
 import SmartAlerts from '@/components/SmartAlerts';
@@ -30,20 +30,17 @@ export default function DashboardPage() {
   const insights = buildInsights(activeFamily);
   const budgetUsage = Math.min((insights.totalSpent / activeFamily.monthlyBudget) * 100, 100);
   const topSpender = getTopSpender(activeFamily.members, activeFamily.expenses);
-  const insightItems = useMemo(
-    () => [
-      { type: 'info', text: `المتبقي من الميزانية: ${formatCurrency(insights.remaining)}` },
-      { type: 'warn', text: `معدل الحرق اليومي: ${formatCurrency(insights.dailyBurnRate)}` },
-      {
-        type: 'danger',
-        text:
-          insights.predictedDaysLeft !== Infinity
-            ? `بهذا المعدل قد تكفي الميزانية ${Math.max(Math.floor(insights.predictedDaysLeft), 0)} يوم فقط`
-            : 'لا يوجد إنفاق كافٍ لحساب توقع النفاد حتى الآن',
-      },
-    ],
-    [insights.dailyBurnRate, insights.predictedDaysLeft, insights.remaining],
-  );
+  const insightItems = [
+    { type: 'info', text: `المتبقي من الميزانية: ${formatCurrency(insights.remaining)}` },
+    { type: 'warn', text: `معدل الحرق اليومي: ${formatCurrency(insights.dailyBurnRate)}` },
+    {
+      type: 'danger',
+      text:
+        insights.predictedDaysLeft !== Infinity
+          ? `بهذا المعدل قد تكفي الميزانية ${Math.max(Math.floor(insights.predictedDaysLeft), 0)} يوم فقط`
+          : 'لا يوجد إنفاق كافٍ لحساب توقع النفاد حتى الآن',
+    },
+  ];
 
   return (
     <AppShell>
