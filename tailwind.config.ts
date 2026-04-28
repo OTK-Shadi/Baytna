@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import colors from 'tailwindcss/colors';
 
 export default {
   content: ['./app/**/*.{js,ts,jsx,tsx}', './components/**/*.{js,ts,jsx,tsx}'],
@@ -6,7 +7,10 @@ export default {
     extend: {
       colors: {
         navy: '#1e3a8a',
-        sky: '#0ea5e9',
+        sky: {
+          ...colors.sky,
+          DEFAULT: '#0ea5e9',
+        },
         cloud: '#f8fafc',
       },
       boxShadow: {
