@@ -30,6 +30,7 @@ export default function DashboardPage() {
   const insights = buildInsights(activeFamily);
   const budgetUsage = Math.min((insights.totalSpent / activeFamily.monthlyBudget) * 100, 100);
   const topSpender = getTopSpender(activeFamily.members, activeFamily.expenses);
+  const overspend = Math.max(insights.totalSpent - activeFamily.monthlyBudget, 0);
   const insightItems = [
     { type: 'info', text: `المتبقي من الميزانية: ${formatCurrency(insights.remaining)}` },
     { type: 'warn', text: `معدل الحرق اليومي: ${formatCurrency(insights.dailyBurnRate)}` },
@@ -44,20 +45,35 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="card p-6 md:col-span-2">
-          <h2 className="text-2xl font-bold">مرحبًا {activeMember.name} 👋</h2>
-          <p className="mt-2 text-slate-500">ميزانية هذا الشهر: {formatCurrency(activeFamily.monthlyBudget)}</p>
-          <div className="mt-4 h-3 overflow-hidden rounded-full bg-indigo-100">
-            <div style={{ width: `${budgetUsage}%` }} className="h-full bg-gradient-to-r from-indigo-500 to-indigo-300" />
+      <section className="grid grid-cols-1 gap-4">
+        <div className="card relative overflow-hidden rounded-3xl border-0 bg-gradient-to-br from-indigo-500 via-indigo-500 to-violet-500 p-5 text-white">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10" />
+          <div className="pointer-events-none absolute -bottom-12 right-12 h-28 w-28 rounded-full bg-white/10" />
+          <h2 className="text-2xl font-extrabold">Dashboard</h2>
+          <p className="text-xs text-indigo-100">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+          <p className="mt-3 text-[11px] font-semibold tracking-wide text-indigo-100">TOTAL BUDGET</p>
+          <h3 className="text-4xl font-black leading-tight">{formatCurrency(activeFamily.monthlyBudget)}</h3>
+          <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold">
+            <span className="rounded-full bg-white/25 px-3 py-1">Spent: {formatCurrency(insights.totalSpent)}</span>
+            <span className="rounded-full bg-rose-200/40 px-3 py-1">Over: {formatCurrency(overspend)}</span>
           </div>
-          <div className="mt-2 text-sm text-slate-500">تم استخدام {budgetUsage.toFixed(0)}% من الميزانية</div>
+          <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/30">
+            <div style={{ width: `${budgetUsage}%` }} className="h-full bg-white" />
+          </div>
+          <div className="mt-2 flex items-center justify-between text-xs text-indigo-100">
+            <span>0 JOD</span>
+            <span>{budgetUsage.toFixed(0)}% used</span>
+            <span>{formatCurrency(activeFamily.monthlyBudget)}</span>
+          </div>
         </div>
 
-        <SmartAlerts alerts={insights.alerts} />
+        <div className="card border-sky-200 bg-[#f7fbff] p-4">
+          <h3 className="mb-2 text-base font-bold">💡 Insights</h3>
+          <SmartAlerts alerts={insights.alerts} />
+        </div>
 
         <div className="card p-4">
-          <h3 className="text-lg font-bold">💡 Insights</h3>
+          <h3 className="text-lg font-bold">Quick Summary</h3>
           <div className="mt-3 space-y-2 text-sm">
             {insightItems.map((item, idx) => (
               <p
@@ -76,7 +92,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="card p-4 md:col-span-2">
+        <div className="card p-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-lg font-bold">Spending Breakdown</h3>
             <div className="flex flex-wrap gap-2">
@@ -121,7 +137,7 @@ export default function DashboardPage() {
           </ul>
         </div>
 
-        <div className="card p-4 md:col-span-2">
+        <div className="card p-4">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-lg font-bold">آخر العمليات</h3>
             <Link className="text-sky-700 underline" href="/expenses">
@@ -129,7 +145,9 @@ export default function DashboardPage() {
             </Link>
           </div>
           <ul className="space-y-2 text-sm">
-            {activeFamily.expenses.slice(0, 5).map((expense) => {
+            {activeFamily.expenses.length === 0 ? (
+              <li className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-center text-slate-500">No expenses yet</li>
+            ) : activeFamily.expenses.slice(0, 5).map((expense) => {
               const member = activeFamily.members.find((m) => m.id === expense.memberId);
               const category = activeFamily.categories.find((c) => c.id === expense.categoryId);
               return (

@@ -1,52 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   color-scheme: light;
+  --legacy-bg: #f4f6fb;
+  --legacy-card: #ffffff;
+  --legacy-border: #e8ecf4;
+  --legacy-primary: #5c6ef8;
+  --legacy-primary-dark: #3d4fd6;
+  --legacy-muted: #8a94a6;
+  --legacy-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --legacy-shadow: 0 4px 16px rgba(92, 110, 248, 0.1), 0 1px 4px rgba(0, 0, 0, 0.06);
+  --legacy-shadow-lg: 0 12px 40px rgba(92, 110, 248, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 body {
-  @apply bg-cloud text-navy;
+  @apply text-navy;
   direction: rtl;
+  font-family: 'DM Sans', sans-serif;
+  background: radial-gradient(circle at 20% 0%, #eef0ff 0%, transparent 35%), radial-gradient(circle at 80% 100%, #eaf3ff 0%, transparent 40%), var(--legacy-bg);
 }
 
 .card {
-  @apply rounded-2xl border border-slate-200 bg-white shadow-soft;
+  @apply rounded-2xl border bg-white;
+  border-color: var(--legacy-border);
+  box-shadow: var(--legacy-shadow-sm);
 }
 
 .input {
-  @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none ring-indigo-200 transition focus:ring-2;
+  @apply w-full rounded-xl border bg-white px-4 py-3 text-slate-800 outline-none ring-indigo-200 transition focus:ring-2;
+  border-color: var(--legacy-border);
 }
 
 .btn-primary {
-  @apply rounded-xl bg-indigo-500 px-4 py-3 font-semibold text-white transition hover:bg-indigo-600;
+  @apply rounded-xl px-4 py-3 font-semibold text-white transition;
+  font-family: 'Sora', sans-serif;
+  background: linear-gradient(135deg, var(--legacy-primary) 0%, #818cf8 100%);
+  box-shadow: var(--legacy-shadow);
 }
+.btn-primary:hover { background: linear-gradient(135deg, var(--legacy-primary-dark) 0%, #6366f1 100%); }
 
 .btn-secondary {
-  @apply rounded-xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-50;
+  @apply rounded-xl border bg-white px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-50;
+  border-color: var(--legacy-border);
+  font-family: 'Sora', sans-serif;
 }
 
 .category-tile {
-  @apply flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-4 text-slate-700 shadow-sm transition;
+  @apply flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border bg-white px-3 py-4 text-slate-700 shadow-sm transition;
+  border-color: var(--legacy-border);
 }
 
-.category-tile:hover {
-  @apply border-indigo-300 bg-indigo-50/50;
-}
+.category-tile:hover { @apply border-indigo-300 bg-indigo-50/50; }
+.category-tile-selected { @apply border-indigo-500 bg-indigo-50 text-indigo-700; }
 
-.category-tile-selected {
-  @apply border-indigo-500 bg-indigo-50 text-indigo-700;
-}
-
-.settings-row {
-  @apply flex items-center justify-between border-b border-slate-200 py-3;
-}
-
-.settings-row:last-child {
-  @apply border-b-0;
-}
-
-.settings-val {
-  @apply text-sm text-slate-500;
-}
+.settings-row { @apply flex items-center justify-between border-b py-3; border-color: var(--legacy-border); }
+.settings-row:last-child { @apply border-b-0; }
+.settings-val { @apply text-sm text-slate-500; }

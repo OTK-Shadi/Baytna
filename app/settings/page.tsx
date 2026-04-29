@@ -29,37 +29,40 @@ export default function SettingsPage() {
     router.push('/');
   };
 
+  const toggleClass = (active: boolean) =>
+    `rounded-full px-4 py-2 text-xs font-semibold transition ${active ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}`;
+
   return (
     <AppShell>
       <section className="space-y-4">
-        <div className="card p-5">
-          <h2 className="text-2xl font-bold">الإعدادات</h2>
-          <div className="mt-3 rounded-xl border border-slate-200 p-3">
+        <div className="card rounded-3xl border-0 bg-gradient-to-br from-indigo-500 to-violet-500 p-5 text-white shadow-[0_12px_40px_rgba(92,110,248,0.15)]">
+          <h2 className="font-['Sora'] text-2xl font-bold">الإعدادات</h2>
+          <div className="mt-3 rounded-2xl border border-white/30 bg-white/10 p-3">
             <p className="font-semibold">{profileName}</p>
-            <p className="text-sm text-slate-500">{activeMember.role === 'admin' ? 'Admin' : 'Member'} · {activeFamily.familyName}</p>
+            <p className="text-sm text-indigo-100">{activeMember.role === 'admin' ? 'Admin' : 'Member'} · {activeFamily.familyName}</p>
           </div>
         </div>
 
         <div className="card p-4">
           <div className="settings-row">
-            <span>Currency</span>
-            <span className="settings-val">EGP 🇪🇬</span>
+            <span className="font-['Sora']">Currency</span>
+            <span className="settings-val">JOD 🇯🇴</span>
           </div>
           <div className="settings-row">
-            <span>Notifications</span>
-            <button className={`btn-secondary py-2 ${notifications ? 'bg-green-50 text-green-700' : ''}`} onClick={() => setNotifications((v) => !v)}>
+            <span className="font-['Sora']">Notifications</span>
+            <button className={toggleClass(notifications)} onClick={() => setNotifications((v) => !v)}>
               {notifications ? 'On ✓' : 'Off'}
             </button>
           </div>
           <div className="settings-row">
-            <span>Budget Warnings</span>
-            <button className={`btn-secondary py-2 ${warnings ? 'bg-green-50 text-green-700' : ''}`} onClick={() => setWarnings((v) => !v)}>
+            <span className="font-['Sora']">Budget Warnings</span>
+            <button className={toggleClass(warnings)} onClick={() => setWarnings((v) => !v)}>
               {warnings ? 'On ✓' : 'Off'}
             </button>
           </div>
           <div className="settings-row">
-            <span>Dark Mode</span>
-            <button className={`btn-secondary py-2 ${darkMode ? 'bg-indigo-50 text-indigo-700' : ''}`} onClick={() => setDarkMode((v) => !v)}>
+            <span className="font-['Sora']">Dark Mode</span>
+            <button className={toggleClass(darkMode)} onClick={() => setDarkMode((v) => !v)}>
               {darkMode ? 'Enabled' : 'Disabled'}
             </button>
           </div>
