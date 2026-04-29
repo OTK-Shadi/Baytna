@@ -83,9 +83,13 @@
 
 - **إجمالي الصرف** = مجموع جميع المصروفات.
 - **المتبقي** = `monthlyBudget - totalSpent`.
-- **معدل الحرق اليومي** = `totalSpent / daysPassedInMonth`.
+- **مؤشر الانضباط**:
+  - الصرف المتوقع حتى اليوم = `(monthlyBudget / daysInMonth) * daysPassedInMonth`.
+  - نسبة الانضباط = `totalSpent / plannedSpendByToday`.
+  - درجة الانضباط = `max(0, 100 - max(disciplineRatio - 1, 0) * 100)`.
 - **توقع النفاد**:
   - الأيام المتبقية القابلة للصرف = `remaining / burnRate`.
+  - تاريخ النفاد المتوقع = `today + predictedDaysLeft`.
   - إن كانت أقل من الأيام المتبقية لنهاية الشهر => تنبيه "قد تنفد الميزانية مبكرًا".
 - **تجاوز الفئات**:
   - عند تجاوز مجموع فئة ما لحدها المحدد.
