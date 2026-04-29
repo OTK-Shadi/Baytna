@@ -77,12 +77,23 @@ export function useFamilyData() {
   };
 
   const joinFamily = (memberName: string, inviteCode: string) => {
-    const found = Object.values(db.families).find((f) => f.inviteCode.toUpperCase() === inviteCode.toUpperCase().trim());
+    const normalizedMemberName = memberName.trim();
+    const normalizedInviteCode = inviteCode.trim().toUpperCase();
+
+    if (normalizedMemberName.length < 2) {
+      return { ok: false as const, message: 'يرجى إدخال اسم لا يقل عن حرفين.' };
+    }
+
+    if (normalizedInviteCode.length < 4) {
+      return { ok: false as const, message: 'يرجى إدخال كود دعوة صحيح (4 أحرف على الأقل).' };
+    }
+
+    const found = Object.values(db.families).find((f) => f.inviteCode.trim().toUpperCase() === normalizedInviteCode);
     if (!found) return { ok: false as const, message: 'كود الدعوة غير صحيح.' };
 
     const newMember: Member = {
       id: generateId('member'),
-      name: memberName,
+      name: normalizedMemberName,
       role: 'member',
       joinedAt: new Date().toISOString(),
     };
