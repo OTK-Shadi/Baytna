@@ -33,25 +33,20 @@ export default function DashboardPage() {
   const budgetUsage = Math.min((insights.totalSpent / safeBudget) * 100, 100);
   const topSpender = getTopSpender(activeFamily.members, activeFamily.expenses);
   const overspend = Math.max(insights.totalSpent - safeBudget, 0);
-  const disciplineLabel =
-    insights.disciplineRatio <= 1
-      ? '🟢 أفضل من الخطة'
-      : insights.disciplineRatio <= 1.15
-        ? '🟠 على الحد'
-        : '🔴 خطر تجاوز';
-  const insightItems = [
-    { type: 'info', text: `المتبقي من الميزانية: ${formatCurrency(insights.remaining, activeFamily.currency)}` },
-    { type: 'warn', text: `مؤشر الانضباط: ${insights.disciplineScore.toFixed(0)}% (${disciplineLabel})` },
+  const quickSummaryItems = [
+    {
+      type: 'info',
+      text: `المتبقي من الميزانية: ${formatCurrency(insights.remaining, activeFamily.currency)}` ,
+    },
+    {
+      type: 'warn',
+      text: `إجمالي المصروف حتى الآن: ${formatCurrency(insights.totalSpent, activeFamily.currency)}` ,
+    },
     {
       type: 'danger',
-      text:
-        insights.projectedDepletionDate
-          ? `تاريخ نفاد الميزانية المتوقع: ${insights.projectedDepletionDate.toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            })}`
-          : 'لا يوجد إنفاق كافٍ لحساب تاريخ النفاد حتى الآن',
+      text: hasInvalidBudget
+        ? 'نسبة استخدام الميزانية: الميزانية الشهرية غير صالحة'
+        : `نسبة استخدام الميزانية: ${budgetUsage.toFixed(0)}%`,
     },
   ];
 
@@ -93,10 +88,9 @@ export default function DashboardPage() {
         <div className="card p-4">
           <div className="flex items-center justify-between gap-2">
             <h3 className="text-lg font-bold">Quick Summary</h3>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{disciplineLabel}</span>
           </div>
           <div className="mt-3 space-y-2 text-sm">
-            {insightItems.map((item, idx) => (
+            {quickSummaryItems.map((item, idx) => (
               <p
                 key={idx}
                 className={`rounded-xl p-3 ${
