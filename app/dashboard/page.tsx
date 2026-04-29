@@ -28,9 +28,11 @@ export default function DashboardPage() {
   }
 
   const insights = buildInsights(activeFamily);
-  const budgetUsage = Math.min((insights.totalSpent / activeFamily.monthlyBudget) * 100, 100);
+  const safeBudget = Number.isFinite(activeFamily.monthlyBudget) && activeFamily.monthlyBudget > 0 ? activeFamily.monthlyBudget : 1;
+  const hasInvalidBudget = !Number.isFinite(activeFamily.monthlyBudget) || activeFamily.monthlyBudget <= 0;
+  const budgetUsage = Math.min((insights.totalSpent / safeBudget) * 100, 100);
   const topSpender = getTopSpender(activeFamily.members, activeFamily.expenses);
-  const overspend = Math.max(insights.totalSpent - activeFamily.monthlyBudget, 0);
+  const overspend = Math.max(insights.totalSpent - safeBudget, 0);
   const insightItems = [
     { type: 'info', text: `المتبقي من الميزانية: ${formatCurrency(insights.remaining, activeFamily.currency)}` },
     { type: 'warn', text: `معدل الحرق اليومي: ${formatCurrency(insights.dailyBurnRate, activeFamily.currency)}` },
@@ -46,6 +48,12 @@ export default function DashboardPage() {
   return (
     <AppShell>
       <section className="grid grid-cols-1 gap-4">
+        {hasInvalidBudget && (
+          <div className="card border border-amber-200 bg-amber-50 p-4 text-amber-900">
+            ⚠️ الميزانية الشهرية غير صالحة أو غير مُحددة. يرجى ضبط الميزانية من الإعدادات أو أثناء الإعداد الأولي.
+          </div>
+        )}
+
         <div className="card relative overflow-hidden rounded-3xl border-0 bg-gradient-to-br from-indigo-500 via-indigo-500 to-violet-500 p-5 text-white">
           <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10" />
           <div className="pointer-events-none absolute -bottom-12 right-12 h-28 w-28 rounded-full bg-white/10" />
