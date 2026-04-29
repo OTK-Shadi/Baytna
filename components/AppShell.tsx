@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { BarChart3, LayoutDashboard, PlusCircle, Settings, UsersRound } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 
@@ -10,6 +13,8 @@ const desktopNav = [
 ];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
   return (
     <main className="min-h-screen bg-slate-100 p-3 pb-24 md:p-6 lg:p-8">
       <div className="mx-auto w-full rounded-3xl border border-slate-200 bg-white/90 p-4 shadow-xl backdrop-blur md:p-6 lg:p-8">
