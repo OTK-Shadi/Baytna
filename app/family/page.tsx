@@ -58,7 +58,7 @@ export default function FamilyPage() {
                   <div className="mb-2 h-2 overflow-hidden rounded-full bg-slate-100">
                     <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-300" style={{ width: `${pct}%` }} />
                   </div>
-                  <p className="text-sm text-slate-500">إجمالي صرفه: {formatCurrency(memberTotal)}</p>
+                  <p className="text-sm text-slate-500">إجمالي صرفه: {formatCurrency(memberTotal, activeFamily.currency)}</p>
                 </li>
               );
             })}

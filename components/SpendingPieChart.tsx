@@ -2,15 +2,18 @@
 
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { formatCurrency } from '@/lib/utils';
 
 const COLORS = ['#0ea5e9', '#1e40af', '#38bdf8', '#0284c7', '#7dd3fc', '#3b82f6', '#60a5fa'];
 
 export default function SpendingPieChart({
   data,
   mode = 'pie',
+  currency = 'JOD',
 }: {
   data: { name: string; value: number }[];
   mode?: 'pie' | 'donut' | 'bar';
+  currency?: string;
 }) {
   const chartData = data.length ? data : [{ name: 'No Data', value: 1 }];
 
@@ -24,7 +27,7 @@ export default function SpendingPieChart({
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
-              <Tooltip formatter={(value: number) => `${value.toLocaleString('ar-EG')} ج.م`} />
+              <Tooltip formatter={(value: number) => formatCurrency(value, currency)} />
               <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                 {chartData.map((_, index) => (
                   <Cell key={index} fill={COLORS[index % COLORS.length]} />
@@ -47,7 +50,7 @@ export default function SpendingPieChart({
                   <Cell key={index} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value: number) => `${value.toLocaleString('ar-EG')} ج.م`} />
+              <Tooltip formatter={(value: number) => formatCurrency(value, currency)} />
             </PieChart>
           )}
         </ResponsiveContainer>

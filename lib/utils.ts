@@ -1,7 +1,7 @@
 import { Expense, Family, Member } from '@/types/family';
 
-export const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('ar-EG', { style: 'currency', currency: 'EGP', maximumFractionDigits: 0 }).format(value);
+export const formatCurrency = (value: number, currency = 'JOD') =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(value);
 
 export const daysPassedInMonth = (date = new Date()) => date.getDate();
 
