@@ -33,15 +33,25 @@ export default function DashboardPage() {
   const budgetUsage = Math.min((insights.totalSpent / safeBudget) * 100, 100);
   const topSpender = getTopSpender(activeFamily.members, activeFamily.expenses);
   const overspend = Math.max(insights.totalSpent - safeBudget, 0);
+  const disciplineLabel =
+    insights.disciplineRatio <= 1
+      ? '🟢 أفضل من الخطة'
+      : insights.disciplineRatio <= 1.15
+        ? '🟠 على الحد'
+        : '🔴 خطر تجاوز';
   const insightItems = [
     { type: 'info', text: `المتبقي من الميزانية: ${formatCurrency(insights.remaining, activeFamily.currency)}` },
-    { type: 'warn', text: `معدل الحرق اليومي: ${formatCurrency(insights.dailyBurnRate, activeFamily.currency)}` },
+    { type: 'warn', text: `مؤشر الانضباط: ${insights.disciplineScore.toFixed(0)}% (${disciplineLabel})` },
     {
       type: 'danger',
       text:
-        insights.predictedDaysLeft !== Infinity
-          ? `بهذا المعدل قد تكفي الميزانية ${Math.max(Math.floor(insights.predictedDaysLeft), 0)} يوم فقط`
-          : 'لا يوجد إنفاق كافٍ لحساب توقع النفاد حتى الآن',
+        insights.projectedDepletionDate
+          ? `تاريخ نفاد الميزانية المتوقع: ${insights.projectedDepletionDate.toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            })}`
+          : 'لا يوجد إنفاق كافٍ لحساب تاريخ النفاد حتى الآن',
     },
   ];
 
@@ -81,7 +91,10 @@ export default function DashboardPage() {
         </div>
 
         <div className="card p-4">
-          <h3 className="text-lg font-bold">Quick Summary</h3>
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-lg font-bold">Quick Summary</h3>
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{disciplineLabel}</span>
+          </div>
           <div className="mt-3 space-y-2 text-sm">
             {insightItems.map((item, idx) => (
               <p

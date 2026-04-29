@@ -25,9 +25,18 @@ export const getTopSpender = (members: Member[], expenses: Expense[]) => {
 export const buildInsights = (family: Family) => {
   const totalSpent = getTotalSpent(family.expenses);
   const remaining = family.monthlyBudget - totalSpent;
-  const dailyBurnRate = totalSpent / Math.max(daysPassedInMonth(), 1);
+  const passedDays = Math.max(daysPassedInMonth(), 1);
+  const totalDays = Math.max(daysInCurrentMonth(), 1);
+  const daysLeftInMonth = Math.max(totalDays - passedDays, 0);
+  const dailyBurnRate = totalSpent / passedDays;
   const predictedDaysLeft = dailyBurnRate > 0 ? remaining / dailyBurnRate : Infinity;
-  const daysLeftInMonth = daysInCurrentMonth() - daysPassedInMonth();
+  const plannedSpendByToday = (family.monthlyBudget / totalDays) * passedDays;
+  const disciplineRatio = plannedSpendByToday > 0 ? totalSpent / plannedSpendByToday : 0;
+  const disciplineScore = Math.max(0, 100 - Math.max(disciplineRatio - 1, 0) * 100);
+  const projectedDepletionDate =
+    dailyBurnRate > 0 && remaining > 0
+      ? new Date(new Date().getFullYear(), new Date().getMonth(), Math.ceil(daysPassedInMonth() + predictedDaysLeft))
+      : null;
 
   const categorySpend = family.categories.map((cat) => {
     const spent = family.expenses.filter((e) => e.categoryId === cat.id).reduce((s, e) => s + e.amount, 0);
@@ -56,6 +65,10 @@ export const buildInsights = (family: Family) => {
     dailyBurnRate,
     predictedDaysLeft,
     daysLeftInMonth,
+    plannedSpendByToday,
+    disciplineRatio,
+    disciplineScore,
+    projectedDepletionDate,
     categorySpend,
     alerts,
   };
