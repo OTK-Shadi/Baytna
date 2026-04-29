@@ -31,6 +31,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
         {children}
       </div>
+      <Link
+        href="/expenses/new"
+        className="fixed bottom-20 right-4 z-50 flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:bg-indigo-500 md:hidden"
+      >
+        <PlusCircle size={18} /> Add Expense
+      </Link>
       <BottomNav />
     </main>
   );
