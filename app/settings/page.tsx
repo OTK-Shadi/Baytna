@@ -7,7 +7,7 @@ import { useFamilyData } from '@/hooks/useFamilyData';
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { ready, activeFamily, activeMember, leaveFamily } = useFamilyData();
+  const { ready, activeFamily, activeMember, leaveFamily, updateFamilyCurrency } = useFamilyData();
   const [notifications, setNotifications] = useState(true);
   const [warnings, setWarnings] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
@@ -46,7 +46,17 @@ export default function SettingsPage() {
         <div className="card p-4">
           <div className="settings-row">
             <span className="font-['Sora']">Currency</span>
-            <span className="settings-val">JOD 🇯🇴</span>
+            <select
+              className="rounded-lg border border-slate-200 px-2 py-1 text-sm"
+              value={activeFamily.currency}
+              onChange={(e) => updateFamilyCurrency(e.target.value)}
+            >
+              <option value="JOD">JOD 🇯🇴</option>
+              <option value="USD">USD 🇺🇸</option>
+              <option value="SAR">SAR 🇸🇦</option>
+              <option value="AED">AED 🇦🇪</option>
+              <option value="EGP">EGP 🇪🇬</option>
+            </select>
           </div>
           <div className="settings-row">
             <span className="font-['Sora']">Notifications</span>

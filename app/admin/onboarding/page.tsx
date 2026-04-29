@@ -29,6 +29,7 @@ export default function AdminOnboardingPage() {
   const [step, setStep] = useState(1);
   const [adminName, setAdminName] = useState('');
   const [familyName, setFamilyName] = useState('');
+  const [currency, setCurrency] = useState('JOD');
   const [monthlyBudget, setMonthlyBudget] = useState(12000);
   const [customCategory, setCustomCategory] = useState('');
   const [customEmoji, setCustomEmoji] = useState('');
@@ -80,6 +81,7 @@ export default function AdminOnboardingPage() {
     const family = createFamily({
       adminName,
       familyName,
+      currency,
       monthlyBudget,
       categories: chosenCategories,
     });
@@ -97,6 +99,13 @@ export default function AdminOnboardingPage() {
           <div className="mt-6 space-y-4">
             <input className="input" placeholder="اسم المدير" value={adminName} onChange={(e) => setAdminName(e.target.value)} />
             <input className="input" placeholder="اسم العائلة/المجموعة" value={familyName} onChange={(e) => setFamilyName(e.target.value)} />
+            <select className="input" value={currency} onChange={(e) => setCurrency(e.target.value)}>
+              <option value="JOD">JOD - Jordanian Dinar</option>
+              <option value="USD">USD - US Dollar</option>
+              <option value="SAR">SAR - Saudi Riyal</option>
+              <option value="AED">AED - UAE Dirham</option>
+              <option value="EGP">EGP - Egyptian Pound</option>
+            </select>
             <input
               className="input"
               type="number"

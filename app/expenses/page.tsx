@@ -69,7 +69,7 @@ export default function ExpensesPage() {
                     <span className="font-bold text-slate-800">{expense.title}</span>
                     <span className="text-slate-600">{member?.name}</span>
                     <span className="inline-flex w-fit rounded-full bg-indigo-50 px-2 py-1 text-xs text-indigo-700">{category?.name}</span>
-                    <span className="font-semibold text-indigo-700">{formatCurrency(expense.amount)}</span>
+                    <span className="font-semibold text-indigo-700">{formatCurrency(expense.amount, activeFamily.currency)}</span>
                     <span className="text-slate-500">{expense.proof ? '📎 مرفق' : '—'}</span>
                     <button className="text-sm font-semibold text-red-600 underline" onClick={() => deleteExpense(expense.id)}>
                       حذف

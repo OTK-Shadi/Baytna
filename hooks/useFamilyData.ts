@@ -14,7 +14,14 @@ export function useFamilyData() {
   useEffect(() => {
     const raw = localStorage.getItem(DB_KEY);
     if (raw) {
-      setDb(JSON.parse(raw));
+      const parsed = JSON.parse(raw) as FamilyDB;
+      const normalizedFamilies = Object.fromEntries(
+        Object.entries(parsed.families).map(([id, family]) => [
+          id,
+          { ...family, currency: family.currency || 'JOD' },
+        ]),
+      );
+      setDb({ ...parsed, families: normalizedFamilies });
     }
     setReady(true);
   }, []);
@@ -37,6 +44,7 @@ export function useFamilyData() {
   const createFamily = (payload: {
     adminName: string;
     familyName: string;
+    currency: string;
     monthlyBudget: number;
     categories: { name: string; limit: number }[];
   }) => {
@@ -50,6 +58,7 @@ export function useFamilyData() {
     const family: Family = {
       id: familyId,
       familyName: payload.familyName,
+      currency: payload.currency || 'JOD',
       monthlyBudget: payload.monthlyBudget,
       inviteCode: generateInviteCode(),
       createdAt: now,
@@ -100,6 +109,13 @@ export function useFamilyData() {
     persist({ ...db, session: {} });
   };
 
+  const updateFamilyCurrency = (currency: string) => {
+    if (!activeFamily) return false;
+    const updatedFamily: Family = { ...activeFamily, currency };
+    persist({ ...db, families: { ...db.families, [activeFamily.id]: updatedFamily } });
+    return true;
+  };
+
   const addExpense = (payload: Omit<Expense, 'id' | 'createdAt' | 'memberId'>) => {
     if (!activeFamily || !db.session.activeMemberId) return false;
     const expense: Expense = {
@@ -143,6 +159,7 @@ export function useFamilyData() {
     joinFamily,
     regenerateInviteCode,
     leaveFamily,
+    updateFamilyCurrency,
     addExpense,
     deleteExpense,
     getFilteredExpenses,

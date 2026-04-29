@@ -32,8 +32,8 @@ export default function DashboardPage() {
   const topSpender = getTopSpender(activeFamily.members, activeFamily.expenses);
   const overspend = Math.max(insights.totalSpent - activeFamily.monthlyBudget, 0);
   const insightItems = [
-    { type: 'info', text: `المتبقي من الميزانية: ${formatCurrency(insights.remaining)}` },
-    { type: 'warn', text: `معدل الحرق اليومي: ${formatCurrency(insights.dailyBurnRate)}` },
+    { type: 'info', text: `المتبقي من الميزانية: ${formatCurrency(insights.remaining, activeFamily.currency)}` },
+    { type: 'warn', text: `معدل الحرق اليومي: ${formatCurrency(insights.dailyBurnRate, activeFamily.currency)}` },
     {
       type: 'danger',
       text:
@@ -52,18 +52,18 @@ export default function DashboardPage() {
           <h2 className="text-2xl font-extrabold">Dashboard</h2>
           <p className="text-xs text-indigo-100">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
           <p className="mt-3 text-[11px] font-semibold tracking-wide text-indigo-100">TOTAL BUDGET</p>
-          <h3 className="text-4xl font-black leading-tight">{formatCurrency(activeFamily.monthlyBudget)}</h3>
+          <h3 className="text-4xl font-black leading-tight">{formatCurrency(activeFamily.monthlyBudget, activeFamily.currency)}</h3>
           <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold">
-            <span className="rounded-full bg-white/25 px-3 py-1">Spent: {formatCurrency(insights.totalSpent)}</span>
-            <span className="rounded-full bg-rose-200/40 px-3 py-1">Over: {formatCurrency(overspend)}</span>
+            <span className="rounded-full bg-white/25 px-3 py-1">Spent: {formatCurrency(insights.totalSpent, activeFamily.currency)}</span>
+            <span className="rounded-full bg-rose-200/40 px-3 py-1">Over: {formatCurrency(overspend, activeFamily.currency)}</span>
           </div>
           <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/30">
             <div style={{ width: `${budgetUsage}%` }} className="h-full bg-white" />
           </div>
           <div className="mt-2 flex items-center justify-between text-xs text-indigo-100">
-            <span>0 JOD</span>
+            <span>{formatCurrency(0, activeFamily.currency)}</span>
             <span>{budgetUsage.toFixed(0)}% used</span>
-            <span>{formatCurrency(activeFamily.monthlyBudget)}</span>
+            <span>{formatCurrency(activeFamily.monthlyBudget, activeFamily.currency)}</span>
           </div>
         </div>
 
@@ -103,6 +103,7 @@ export default function DashboardPage() {
           </div>
           <SpendingPieChart
             mode={chartMode}
+            currency={activeFamily.currency}
             data={insights.categorySpend.map((c) => ({
               name: c.name,
               value: c.spent,
@@ -115,7 +116,7 @@ export default function DashboardPage() {
           <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
             <p className="text-xs font-semibold text-amber-700">🏆 الأعلى إنفاقًا هذا الشهر</p>
             <p className="mt-1 text-xl font-bold">{topSpender ? topSpender.member.name : 'لا يوجد بعد'}</p>
-            <p className="text-sm text-amber-700">{topSpender ? formatCurrency(topSpender.total) : '0'}</p>
+            <p className="text-sm text-amber-700">{topSpender ? formatCurrency(topSpender.total, activeFamily.currency) : formatCurrency(0, activeFamily.currency)}</p>
           </div>
         </div>
 
@@ -131,7 +132,7 @@ export default function DashboardPage() {
               .map((entry, index) => (
                 <li key={entry.member.id} className="flex items-center justify-between rounded-xl bg-sky-50 p-3">
                   <span>{index + 1}. {entry.member.name}</span>
-                  <strong>{formatCurrency(entry.total)}</strong>
+                  <strong>{formatCurrency(entry.total, activeFamily.currency)}</strong>
                 </li>
               ))}
           </ul>
@@ -155,7 +156,7 @@ export default function DashboardPage() {
                   <span className="font-semibold">{expense.title}</span>
                   <span>{member?.name}</span>
                   <span>{category?.name}</span>
-                  <span className="font-bold">{formatCurrency(expense.amount)}</span>
+                  <span className="font-bold">{formatCurrency(expense.amount, activeFamily.currency)}</span>
                 </li>
               );
             })}

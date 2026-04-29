@@ -27,6 +27,7 @@ export interface Expense {
 export interface Family {
   id: string;
   familyName: string;
+  currency: string;
   monthlyBudget: number;
   inviteCode: string;
   createdAt: string;
