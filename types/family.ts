@@ -36,6 +36,12 @@ export interface Family {
   expenses: Expense[];
 }
 
+
+export interface InsightAlert {
+  priority: number;
+  message: string;
+}
+
 export interface FamilyDB {
   families: Record<string, Family>;
   session: {
