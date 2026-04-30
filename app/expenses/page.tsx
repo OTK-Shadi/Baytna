@@ -71,24 +71,30 @@ export default function ExpensesPage() {
               const category = activeFamily.categories.find((c) => c.id === expense.categoryId);
               return (
                 <li key={expense.id} className="rounded-2xl border border-[#e8ecf4] bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,.06)]">
-                  <div className="grid grid-cols-1 gap-2 md:grid-cols-6 md:items-center">
-                    <span className="font-bold text-slate-800">{expense.title}</span>
-                    <span className="text-slate-600">{member?.name}</span>
-                    <span className="inline-flex w-fit rounded-full bg-indigo-50 px-2 py-1 text-xs text-indigo-700">{category?.name}</span>
-                    <span className="font-semibold text-indigo-700">{formatCurrency(expense.amount, activeFamily.currency)}</span>
-                    <span className="text-slate-500">{expense.proof ? '📎 مرفق' : '—'}</span>
-                    <button className="text-sm font-semibold text-red-600 underline" onClick={() => deleteExpense(expense.id)}>
-                      حذف
-                    </button>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h4 className="truncate text-base font-bold text-slate-900">{expense.title}</h4>
+                      <p className="mt-0.5 text-xs text-slate-500">{formatExpenseDate(expense.createdAt)}</p>
+                    </div>
+                    <span className="shrink-0 text-base font-extrabold text-indigo-700">{formatCurrency(expense.amount, activeFamily.currency)}</span>
                   </div>
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
-                    <span>التاريخ: {formatExpenseDate(expense.createdAt)}</span>
-                    <span>{expense.proof ? '📎 يوجد مرفق' : 'لا يوجد مرفق'}</span>
+
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                    <span className="rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-700">👤 {member?.name ?? '—'}</span>
+                    <span className="rounded-full bg-indigo-50 px-2.5 py-1 font-medium text-indigo-700">🏷️ {category?.name ?? 'غير مصنّف'}</span>
+                    <span className="rounded-full bg-amber-50 px-2.5 py-1 font-medium text-amber-700">{expense.proof ? '📎 يوجد مرفق' : 'بدون مرفق'}</span>
                   </div>
-                  <p className="mt-2 rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600">
+
+                  <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-sm leading-relaxed text-slate-600">
                     <span className="font-semibold text-slate-700">ملاحظة:</span>{' '}
                     {expense.note?.trim() ? expense.note : 'لا توجد ملاحظة'}
                   </p>
+
+                  <div className="mt-3 flex justify-end border-t border-slate-100 pt-3">
+                    <button className="rounded-lg bg-red-50 px-3 py-1.5 text-sm font-semibold text-red-600" onClick={() => deleteExpense(expense.id)}>
+                      حذف
+                    </button>
+                  </div>
                 </li>
               );
             })}
