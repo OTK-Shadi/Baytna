@@ -36,8 +36,8 @@ export default function SpendingPieChart({
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex h-full items-center gap-4">
-            <div className="h-full w-2/3">
+          <div className="flex h-full flex-col gap-4 md:flex-row md:items-center">
+            <div className="h-40 w-full md:h-full md:w-2/3">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -60,15 +60,15 @@ export default function SpendingPieChart({
               </ResponsiveContainer>
             </div>
 
-            <ul className="w-1/3 space-y-2 overflow-auto text-sm">
+            <ul className="w-full space-y-2 overflow-auto text-sm md:w-1/3">
               {chartData.map((item, index) => (
-                <li key={`${item.name}-${index}`} className="flex items-center justify-between gap-2">
-                  <div className="flex min-w-0 items-center gap-2">
+                <li key={`${item.name}-${index}`} className="flex items-start justify-between gap-2">
+                  <div className="flex min-w-0 items-start gap-2">
                     <span
                       className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
                       style={{ backgroundColor: COLORS[index % COLORS.length] }}
                     />
-                    <span className="truncate">{item.name}</span>
+                    <span className="break-words">{item.name}</span>
                   </div>
                   <span className="shrink-0 font-medium">{formatCurrency(item.value, currency)}</span>
                 </li>
