@@ -36,8 +36,8 @@ export default function SpendingPieChart({
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex h-full flex-col gap-4 md:flex-row md:items-center">
-            <div className="h-40 w-full md:h-full md:w-2/3">
+          <div className="flex h-full flex-col gap-4 pt-2 md:flex-row md:items-center md:pt-0">
+            <div className="h-48 w-full md:h-full md:w-2/3">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -47,7 +47,7 @@ export default function SpendingPieChart({
                     cx="50%"
                     cy="50%"
                     innerRadius={mode === 'donut' ? 55 : 0}
-                    outerRadius={90}
+                    outerRadius="82%"
                     label={false}
                     labelLine={false}
                   >
