@@ -9,7 +9,7 @@ export default function SmartAlerts({ alerts }: { alerts: InsightAlert[] }) {
   return (
     <div className="card p-4">
       <h3 className="mb-3 flex items-center gap-2 text-lg font-bold">
-        <AlertTriangle className="text-amber-500" size={18} /> تنبيهات ذكية
+        <AlertTriangle className="text-amber-500" size={18} /> Smart Insights
       </h3>
       <p className="mb-3 text-xs text-amber-700">
         الترتيب من الأعلى إلى الأسفل حسب الأهمية، وأول تنبيه هو الأكثر أهمية الآن.

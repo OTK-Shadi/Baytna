@@ -86,7 +86,6 @@ export default function DashboardPage() {
         </div>
 
         <div className="card border-sky-200 bg-[#f7fbff] p-4">
-          <h3 className="mb-2 text-base font-bold">💡 Insights</h3>
           <SmartAlerts alerts={insights.alerts} />
         </div>
 
