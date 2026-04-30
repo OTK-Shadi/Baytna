@@ -27,7 +27,7 @@ export default function AnalyticsPage() {
       <section className="space-y-4">
         <div className="card p-5">
           <h2 className="text-2xl font-bold">التحليلات</h2>
-          <p className="mt-1 text-slate-500">عرض مرئي لأنماط الصرف على طريقة التصميم القديم.</p>
+          <p className="mt-1 text-slate-500">عرض مرئي لأنماط الصرف لمساعدتك على فهم عادات الإنفاق.</p>
         </div>
 
         <div className="card p-4">
