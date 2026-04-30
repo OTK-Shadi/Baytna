@@ -17,9 +17,6 @@ export default function SmartAlerts({ alerts }: { alerts: InsightAlert[] }) {
       <ul className="space-y-2 text-sm">
         {alerts.map((alert, idx) => (
           <li key={`${alert.priority}-${idx}`} className="rounded-xl bg-amber-50 p-3 text-amber-800">
-            <span className="ml-2 inline-flex min-w-7 items-center justify-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-900">
-              {alert.priority}
-            </span>
             {alert.message}
           </li>
         ))}
