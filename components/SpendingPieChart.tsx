@@ -30,7 +30,7 @@ export default function SpendingPieChart({
               <Tooltip formatter={(value: number) => formatCurrency(value, currency)} />
               <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                 {chartData.map((_, index) => (
-                  <Cell key={index} fill={COLORS[index % COLORS.length]} stroke="#ffffff" strokeWidth={2} />
+                  <Cell key={index} fill={COLORS[index % COLORS.length]} stroke="#ffffff" strokeWidth={mode === 'donut' ? 1 : 2} />
                 ))}
               </Bar>
             </BarChart>
@@ -46,13 +46,13 @@ export default function SpendingPieChart({
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    innerRadius={mode === 'donut' ? 55 : 0}
-                    outerRadius="82%"
+                    innerRadius={mode === 'donut' ? '45%' : 0}
+                    outerRadius={mode === 'donut' ? '72%' : '82%'}
                     label={false}
                     labelLine={false}
                   >
                     {chartData.map((_, index) => (
-                      <Cell key={index} fill={COLORS[index % COLORS.length]} stroke="#ffffff" strokeWidth={2} />
+                      <Cell key={index} fill={COLORS[index % COLORS.length]} stroke="#ffffff" strokeWidth={mode === 'donut' ? 1 : 2} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(value: number) => formatCurrency(value, currency)} />
