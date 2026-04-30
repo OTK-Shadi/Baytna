@@ -18,7 +18,6 @@ export default function NewExpensePage() {
   const [amountInput, setAmountInput] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [note, setNote] = useState('');
-  const [proof, setProof] = useState('');
   const [toast, setToast] = useState('');
   const amount = parsePositiveAmount(amountInput);
 
@@ -40,7 +39,6 @@ export default function NewExpensePage() {
       amount,
       categoryId,
       note,
-      proof: proof.trim() ? proof.trim() : undefined,
     });
 
     if (ok) {
@@ -82,12 +80,6 @@ export default function NewExpensePage() {
               ))}
             </select>
             <textarea className="input min-h-24" placeholder="ملاحظة (اختيارية)" value={note} onChange={(e) => setNote(e.target.value)} />
-            <input
-              className="input"
-              placeholder="الإثبات/الصورة (Base64 قصير أو IMAGE_ATTACHED)"
-              value={proof}
-              onChange={(e) => setProof(e.target.value)}
-            />
             <button className="btn-primary w-full" type="submit" disabled={amount === null}>
               حفظ المصروف
             </button>
