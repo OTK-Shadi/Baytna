@@ -6,6 +6,12 @@ import AppShell from '@/components/AppShell';
 import { useFamilyData } from '@/hooks/useFamilyData';
 import { formatCurrency } from '@/lib/utils';
 
+const formatExpenseDate = (isoDate: string) => {
+  const parsed = new Date(isoDate);
+  if (Number.isNaN(parsed.getTime())) return '—';
+  return parsed.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+
 export default function ExpensesPage() {
   const { ready, activeFamily, getFilteredExpenses, deleteExpense } = useFamilyData();
   const [memberId, setMemberId] = useState('');
@@ -75,7 +81,11 @@ export default function ExpensesPage() {
                       حذف
                     </button>
                   </div>
-                  <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+                    <span>التاريخ: {formatExpenseDate(expense.createdAt)}</span>
+                    <span>{expense.proof ? '📎 يوجد مرفق' : 'لا يوجد مرفق'}</span>
+                  </div>
+                  <p className="mt-2 rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600">
                     <span className="font-semibold text-slate-700">ملاحظة:</span>{' '}
                     {expense.note?.trim() ? expense.note : 'لا توجد ملاحظة'}
                   </p>
