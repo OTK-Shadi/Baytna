@@ -25,18 +25,20 @@ export default function SpendingPieChart({
       <div className="h-64">
         {mode === 'bar' ? (
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 32 }}>
+            <BarChart data={chartData} margin={{ top: 8, right: 12, left: 20, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="name"
                 interval={0}
                 angle={-30}
                 textAnchor="end"
-                height={60}
+                height={68}
+                tickMargin={10}
+                minTickGap={14}
                 tick={{ fontSize: 12 }}
                 tickFormatter={shortenLabel}
               />
-              <YAxis />
+              <YAxis width={56} />
               <Tooltip formatter={(value: number) => formatCurrency(value, currency)} />
               <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                 {chartData.map((_, index) => (
