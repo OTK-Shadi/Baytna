@@ -127,6 +127,63 @@ export function useFamilyData() {
     return true;
   };
 
+  const updateFamilyMonthlyBudget = (monthlyBudget: number) => {
+    if (!activeFamily || monthlyBudget <= 0) return false;
+    const updatedFamily: Family = { ...activeFamily, monthlyBudget };
+    persist({ ...db, families: { ...db.families, [activeFamily.id]: updatedFamily } });
+    return true;
+  };
+
+  const addCategory = (name: string, limit: number) => {
+    if (!activeFamily) return false;
+    if (!name.trim() || limit <= 0) return false;
+    if (activeFamily.categories.some((category) => category.name === name.trim())) return false;
+    const nextCategory: Category = { id: generateId('cat'), name: name.trim(), limit };
+    const updatedFamily: Family = { ...activeFamily, categories: [...activeFamily.categories, nextCategory] };
+    persist({ ...db, families: { ...db.families, [activeFamily.id]: updatedFamily } });
+    return true;
+  };
+
+  const updateCategory = (categoryId: string, payload: { name?: string; limit?: number }) => {
+    if (!activeFamily) return false;
+    const nextName = payload.name?.trim();
+    if (nextName && activeFamily.categories.some((category) => category.id !== categoryId && category.name === nextName)) {
+      return false;
+    }
+
+    const updatedCategories = activeFamily.categories.map((category) => {
+      if (category.id !== categoryId) return category;
+      return {
+        ...category,
+        name: nextName || category.name,
+        limit: payload.limit && payload.limit > 0 ? payload.limit : category.limit,
+      };
+    });
+
+    const updatedFamily: Family = { ...activeFamily, categories: updatedCategories };
+    persist({ ...db, families: { ...db.families, [activeFamily.id]: updatedFamily } });
+    return true;
+  };
+
+  const deleteCategory = (categoryId: string) => {
+    if (!activeFamily) return false;
+    if (activeFamily.categories.length <= 1) return false;
+    const updatedCategories = activeFamily.categories.filter((category) => category.id !== categoryId);
+    if (updatedCategories.length === activeFamily.categories.length) return false;
+
+    const removedCategory = activeFamily.categories.find((category) => category.id === categoryId);
+    const fallbackCategoryId = updatedCategories[0]?.id;
+    const updatedExpenses = removedCategory && fallbackCategoryId
+      ? activeFamily.expenses.map((expense) =>
+          expense.categoryId === removedCategory.id ? { ...expense, categoryId: fallbackCategoryId } : expense,
+        )
+      : activeFamily.expenses;
+
+    const updatedFamily: Family = { ...activeFamily, categories: updatedCategories, expenses: updatedExpenses };
+    persist({ ...db, families: { ...db.families, [activeFamily.id]: updatedFamily } });
+    return true;
+  };
+
   const addExpense = (payload: Omit<Expense, 'id' | 'createdAt' | 'memberId'>) => {
     if (!activeFamily || !db.session.activeMemberId) return false;
     const expense: Expense = {
@@ -171,6 +228,10 @@ export function useFamilyData() {
     regenerateInviteCode,
     leaveFamily,
     updateFamilyCurrency,
+    updateFamilyMonthlyBudget,
+    addCategory,
+    updateCategory,
+    deleteCategory,
     addExpense,
     deleteExpense,
     getFilteredExpenses,
