@@ -49,6 +49,11 @@ export default function DashboardPage() {
         : `نسبة استخدام الميزانية: ${budgetUsage.toFixed(0)}%`,
     },
   ];
+  const formatExpenseDate = (isoDate: string) => {
+    const parsed = new Date(isoDate);
+    if (Number.isNaN(parsed.getTime())) return '—';
+    return parsed.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  };
 
   return (
     <AppShell>
@@ -167,26 +172,22 @@ export default function DashboardPage() {
               const member = activeFamily.members.find((m) => m.id === expense.memberId);
               const category = activeFamily.categories.find((c) => c.id === expense.categoryId);
               return (
-                <li key={expense.id} className="rounded-xl bg-sky-50 p-3">
-                  <div className="space-y-2 md:hidden">
-                    <div className="flex items-start justify-between gap-3">
-                      <span className="font-semibold text-slate-800">{expense.title}</span>
-                      <span className="shrink-0 font-bold text-slate-900">{formatCurrency(expense.amount, activeFamily.currency)}</span>
+                <li key={expense.id} className="rounded-2xl border border-[#e8ecf4] bg-white p-3 shadow-[0_1px_3px_rgba(0,0,0,.05)]">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 font-bold text-slate-600">
+                      {(member?.name?.[0] ?? 'A').toUpperCase()}
                     </div>
-                    <div className="flex items-center justify-between text-slate-600">
-                      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Member</span>
-                      <span>{member?.name ?? '—'}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-semibold text-slate-900">{expense.title}</div>
+                      <div className="text-xs text-slate-500">{formatExpenseDate(expense.createdAt)}</div>
                     </div>
-                    <div className="flex items-center justify-between text-slate-600">
-                      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Category</span>
-                      <span>{category?.name ?? '—'}</span>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="shrink-0 text-base font-bold text-slate-900">{formatCurrency(expense.amount, activeFamily.currency)}</span>
+                      <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-semibold text-violet-700">{category?.name ?? 'Uncategorized'}</span>
                     </div>
                   </div>
-                  <div className="hidden grid-cols-4 gap-2 md:grid">
-                    <span className="font-semibold">{expense.title}</span>
-                    <span>{member?.name ?? '—'}</span>
-                    <span>{category?.name ?? '—'}</span>
-                    <span className="font-bold">{formatCurrency(expense.amount, activeFamily.currency)}</span>
+                  <div className="mt-2 text-xs text-slate-500">
+                    by {member?.name ?? '—'}
                   </div>
                 </li>
               );
