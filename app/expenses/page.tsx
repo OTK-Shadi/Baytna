@@ -75,6 +75,10 @@ export default function ExpensesPage() {
                       حذف
                     </button>
                   </div>
+                  <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                    <span className="font-semibold text-slate-700">ملاحظة:</span>{' '}
+                    {expense.note?.trim() ? expense.note : 'لا توجد ملاحظة'}
+                  </p>
                 </li>
               );
             })}
