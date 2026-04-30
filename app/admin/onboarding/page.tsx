@@ -61,6 +61,15 @@ export default function AdminOnboardingPage() {
       return Boolean(category.name.trim()) && parsedLimit !== null;
     });
   }, [categoryLimitInputs, chosenCategories]);
+  const totalSelectedLimits = useMemo(
+    () =>
+      chosenCategories.reduce((sum, category) => {
+        const parsedLimit = parsePositiveAmount(categoryLimitInputs[category.name] ?? String(category.limit));
+        return sum + (parsedLimit ?? 0);
+      }, 0),
+    [categoryLimitInputs, chosenCategories],
+  );
+  const isCategoryLimitOverBudget = monthlyBudget !== null && totalSelectedLimits > monthlyBudget;
 
   if (!ready) return null;
 
@@ -175,6 +184,14 @@ export default function AdminOnboardingPage() {
 
             <div className="space-y-2 rounded-2xl border border-sky-100 bg-sky-50/70 p-4">
               <p className="text-sm font-semibold text-slate-700">حدود الميزانية للفئات المختارة</p>
+              <p className="text-xs text-slate-600">
+                مجموع الحدود: {totalSelectedLimits.toFixed(2)} / الميزانية: {monthlyBudget !== null ? monthlyBudget.toFixed(2) : '--'}
+              </p>
+              {isCategoryLimitOverBudget && (
+                <p className="text-xs font-semibold text-red-600">
+                  مجموع حدود الفئات يجب أن يكون أقل من أو يساوي ميزانية الشهر.
+                </p>
+              )}
               {chosenCategories.map((cat) => {
                 const index = categories.findIndex((item) => item.name === cat.name);
                 return (
