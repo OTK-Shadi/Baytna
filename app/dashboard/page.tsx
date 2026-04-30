@@ -167,11 +167,27 @@ export default function DashboardPage() {
               const member = activeFamily.members.find((m) => m.id === expense.memberId);
               const category = activeFamily.categories.find((c) => c.id === expense.categoryId);
               return (
-                <li key={expense.id} className="grid grid-cols-1 gap-1 rounded-xl bg-sky-50 p-3 sm:grid-cols-2 md:grid-cols-4">
-                  <span className="font-semibold">{expense.title}</span>
-                  <span>{member?.name}</span>
-                  <span>{category?.name}</span>
-                  <span className="font-bold">{formatCurrency(expense.amount, activeFamily.currency)}</span>
+                <li key={expense.id} className="rounded-xl bg-sky-50 p-3">
+                  <div className="space-y-2 md:hidden">
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="font-semibold text-slate-800">{expense.title}</span>
+                      <span className="shrink-0 font-bold text-slate-900">{formatCurrency(expense.amount, activeFamily.currency)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-slate-600">
+                      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Member</span>
+                      <span>{member?.name ?? '—'}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-slate-600">
+                      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Category</span>
+                      <span>{category?.name ?? '—'}</span>
+                    </div>
+                  </div>
+                  <div className="hidden grid-cols-4 gap-2 md:grid">
+                    <span className="font-semibold">{expense.title}</span>
+                    <span>{member?.name ?? '—'}</span>
+                    <span>{category?.name ?? '—'}</span>
+                    <span className="font-bold">{formatCurrency(expense.amount, activeFamily.currency)}</span>
+                  </div>
                 </li>
               );
             })}
