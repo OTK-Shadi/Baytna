@@ -137,10 +137,12 @@ npm run start
 
 ## Post-hackathon roadmap
 
-- Cloud sync and account-based access.
-- Smarter behavior-based spending alerts.
+- More advanced authentication and authorization system.
+- Calendar reminders for recurring static expenses (for example: monthly rent).
+- AI-generated end-of-month summaries with insights and actionable tips to improve next month's budget.
 - Monthly saving goals with automatic recommendations.
-- Multi-currency support and PDF reports.
+- Smarter behavior-based spending alerts.
+- PDF reports for monthly household spending summaries.
 
 ---
 
