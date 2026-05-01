@@ -104,8 +104,8 @@ export default function DailyExpensesChart({
               formatter={(value: number, name: string) => [formatCurrency(value, currency), name === 'budgetLine' ? 'Daily budget' : 'Expenses']}
               labelFormatter={(label) => `Date: ${label}`}
             />
-            <Area type="monotone" dataKey="budgetLine" stroke="#94a3b8" strokeDasharray="5 5" fillOpacity={0} />
-            <Area type="monotone" dataKey="amount" stroke="#4f46e5" strokeWidth={2.5} fill="url(#dailyExpensesGradient)" />
+            <Area type="linear" dataKey="budgetLine" stroke="#94a3b8" strokeDasharray="5 5" fillOpacity={0} />
+            <Area type="linear" dataKey="amount" stroke="#4f46e5" strokeWidth={2.5} fill="url(#dailyExpensesGradient)" />
           </AreaChart>
         </ResponsiveContainer>
       </div>
