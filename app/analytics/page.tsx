@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import AppShell from '@/components/AppShell';
 import SpendingPieChart from '@/components/SpendingPieChart';
+import DailyExpensesChart from '@/components/DailyExpensesChart';
 import { useFamilyData } from '@/hooks/useFamilyData';
 import { buildInsights, formatCurrency } from '@/lib/utils';
 
@@ -42,6 +43,13 @@ export default function AnalyticsPage() {
             data={insights.categorySpend.map((item) => ({ name: item.name, value: item.spent }))}
           />
         </div>
+
+
+        <DailyExpensesChart
+          expenses={activeFamily.expenses.map((expense) => ({ amount: expense.amount, createdAt: expense.createdAt }))}
+          currency={activeFamily.currency}
+          monthlyBudget={activeFamily.monthlyBudget}
+        />
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {insights.categorySpend.map((item) => (
