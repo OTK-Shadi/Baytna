@@ -1,30 +1,30 @@
-# Architecture | هيكلية البيانات والتخزين المحلي
+# Architecture | Data Model and Local Storage
 
-يعتمد التطبيق بالكامل على مفتاح واحد داخل `localStorage`:
+The app relies entirely on one `localStorage` key:
 
 - **Key:** `family_db`
 
-## مخطط JSON المعتمد
+## JSON schema
 
 ```json
 {
   "families": {
     "family_id": {
       "id": "family_id",
-      "familyName": "عائلة النور",
+      "familyName": "Al-Noor Family",
       "monthlyBudget": 12000,
       "inviteCode": "AB12CD",
       "createdAt": "2026-04-28T10:00:00.000Z",
       "members": [
         {
           "id": "member_1",
-          "name": "سارة",
+          "name": "Sara",
           "role": "admin",
           "joinedAt": "2026-04-28T10:00:00.000Z"
         },
         {
           "id": "member_2",
-          "name": "أحمد",
+          "name": "Ahmed",
           "role": "member",
           "joinedAt": "2026-04-28T11:00:00.000Z"
         }
@@ -32,22 +32,22 @@
       "categories": [
         {
           "id": "cat_food",
-          "name": "الطعام",
+          "name": "Food",
           "limit": 3000
         },
         {
           "id": "cat_rent",
-          "name": "الإيجار",
+          "name": "Rent",
           "limit": 5000
         }
       ],
       "expenses": [
         {
           "id": "exp_1",
-          "title": "سوبرماركت",
+          "title": "Supermarket",
           "amount": 220,
           "categoryId": "cat_food",
-          "note": "شراء أسبوعي",
+          "note": "Weekly shopping",
           "proof": "IMAGE_ATTACHED",
           "memberId": "member_1",
           "createdAt": "2026-04-28T12:00:00.000Z"
@@ -62,69 +62,77 @@
 }
 ```
 
-## فلسفة البنية
+## Design principles
 
-1. **عائلة واحدة أو عدة عائلات**: التخزين يدعم التوسع عبر `families` كـ map.
-2. **جلسة محلية بسيطة**: `session` تحدد العضو والعائلة النشطة.
-3. **عدم الاعتماد على خادم**: كل العمليات CRUD تتم داخل Hook موحد.
-4. **سهولة العرض في الهاكاثون**: بيانات واضحة وقابلة للتتبع السريع.
+1. **Single or multiple families:** supports expansion using `families` as a map.
+2. **Simple local session:** `session` tracks active family and active member.
+3. **No backend dependency:** all CRUD runs in a unified hook.
+4. **Hackathon demo-friendly:** clear and traceable data model.
 
-## عمليات CRUD داخل `useFamilyData`
+## CRUD operations in `useFamilyData`
 
-- إنشاء عائلة جديدة + مدير.
-- الانضمام لعائلة عبر `inviteCode`.
-- إضافة/حذف مصروف.
-- استرجاع المصروفات مع خيارات تصفية (حسب العضو/الفئة).
-- تحديث الجلسة النشطة.
+- Create new family + admin.
+- Join family through `inviteCode`.
+- Add/delete expense.
+- Fetch expenses with filters (member/category).
+- Update active session.
+- Reset all local data from settings.
 
-## الذكاء المالي (Smart Insights)
+## Smart insights
 
-يتم احتساب المؤشرات لحظيًا من البيانات:
+Metrics are computed in real time from stored data:
 
-- **إجمالي الصرف** = مجموع جميع المصروفات.
-- **المتبقي** = `monthlyBudget - totalSpent`.
-- **مؤشر الانضباط**:
-  - الصرف المتوقع حتى اليوم = `(monthlyBudget / daysInMonth) * daysPassedInMonth`.
-  - نسبة الانضباط = `totalSpent / plannedSpendByToday`.
-  - درجة الانضباط = `max(0, 100 - max(disciplineRatio - 1, 0) * 100)`.
-- **توقع النفاد**:
-  - الأيام المتبقية القابلة للصرف = `remaining / burnRate`.
-  - تاريخ النفاد المتوقع = `today + predictedDaysLeft`.
-  - إن كانت أقل من الأيام المتبقية لنهاية الشهر => تنبيه "قد تنفد الميزانية مبكرًا".
-- **تجاوز الفئات**:
-  - عند تجاوز مجموع فئة ما لحدها المحدد.
+- **Total spent** = sum of all expenses.
+- **Remaining** = `monthlyBudget - totalSpent`.
+- **Discipline score:**
+  - Planned spend by today = `(monthlyBudget / daysInMonth) * daysPassedInMonth`.
+  - Discipline ratio = `totalSpent / plannedSpendByToday`.
+  - Discipline score = `max(0, 100 - max(disciplineRatio - 1, 0) * 100)`.
+- **Depletion prediction:**
+  - Predicted spendable days left = `remaining / burnRate`.
+  - Predicted depletion date = `today + predictedDaysLeft`.
+  - If earlier than month-end, alert that budget may run out early.
+- **Category overrun:**
+  - Triggered when category spend exceeds its category limit.
 
-### قواعد التنبيهات الذكية (Smart Alerts Rules)
+### Smart alerts rules
 
-يتم توليد التنبيهات وترتيبها حسب `priority` تصاعديًا (الأصغر يظهر أولًا):
+Alerts are generated and sorted by ascending `priority` (smaller first):
 
-1. **تجاوز الميزانية الشهرية** (`priority: 1`, `tone: danger`, `emoji: 🚨`)
-   - الشرط: `totalSpent > monthlyBudget`.
-2. **استهلاك مرتفع في منتصف الشهر** (`priority: 2`, `tone: warning`, `emoji: ⚠️`)
-   - الشرط: تقدم الشهر `>= 50%` والإنفاق `>= 55%` من الميزانية.
-3. **وصول الإنفاق إلى 80% أو أكثر** (`priority: 3`, `tone: warning`, `emoji: 🟠`)
-   - الشرط: `totalSpent >= 80%` من `monthlyBudget`.
-   - اللون: برتقالي (لأن `tone: warning`).
-4. **فئة واحدة تستهلك حصة كبيرة من الميزانية** (`priority: 4`, `tone: warning`, `emoji: 🟠`)
-   - الشرط: حصة الفئة الأعلى `>= 40%` من الميزانية الكلية.
-5. **تجاوز حد فئة** (`priority: 5`, `tone: danger`, `emoji: ⛔`)
-   - الشرط: `categorySpent > categoryLimit`.
-6. **ملخص متوسط الصرف الأسبوعي والتقدير الشهري** (`priority: 6`, بنبرة ديناميكية)
-   - النبرة تعتمد على المقارنة بين التقدير الشهري والميزانية.
-7. **لا توجد مصروفات اليوم** (`priority: 7`, `tone: success`, `emoji: ✅`)
-   - الشرط: عدم تسجيل أي مصروف في تاريخ اليوم.
+1. **Monthly budget exceeded** (`priority: 1`, `tone: danger`, `emoji: 🚨`)
+   - Condition: `totalSpent > monthlyBudget`.
+2. **High spending pace at mid-month** (`priority: 2`, `tone: warning`, `emoji: ⚠️`)
+   - Condition: month progress `>= 50%` and spending `>= 55%` of budget.
+3. **Reached 80% or more of budget** (`priority: 3`, `tone: warning`, `emoji: 🟠`)
+   - Condition: `totalSpent >= 80%` of `monthlyBudget`.
+4. **Single category consuming large budget share** (`priority: 4`, `tone: warning`, `emoji: 🟠`)
+   - Condition: top category share `>= 40%` of total budget.
+5. **Category limit exceeded** (`priority: 5`, `tone: danger`, `emoji: ⛔`)
+   - Condition: `categorySpent > categoryLimit`.
+6. **Weekly average + monthly estimate summary** (`priority: 6`, dynamic tone)
+   - Tone depends on estimated monthly spending vs budget.
+7. **No expenses logged today** (`priority: 7`, `tone: success`, `emoji: ✅`)
+   - Condition: no expense added on current date.
 
-## ملاحظات الأداء والقيود
+## Route-to-data mapping
 
-- `localStorage` مناسب لـ MVP لكن ليس للإنتاج واسع النطاق.
-- لا يتم حفظ صور عالية الدقة؛ فقط نص قصير/placeholder في حقل `proof`.
+- `/dashboard`: reads summary metrics, insights, and alerts.
+- `/expenses/new`: writes a new expense into `expenses`.
+- `/expenses`: reads full expenses list with filters.
+- `/analytics`: aggregates expenses by time and category.
+- `/family`: reads `members` list.
+- `/settings`: clears `family_db` entirely.
 
+## Performance notes and limitations
 
-## ملاحظات واجهة لوحة التحكم (Dashboard UI)
+- `localStorage` is suitable for MVP, not for large-scale production.
+- High-resolution image uploads are not persisted; only short text/placeholders in `proof`.
 
-- **Quick Summary** يعرض 3 أسطر ثابتة وواضحة للمستخدم:
-  1. المتبقي من الميزانية
-  2. إجمالي المصروف حتى الآن
-  3. نسبة استخدام الميزانية
-- عند كون `monthlyBudget` غير صالح (<= 0 أو غير رقم)، يتم عرض نص بديل في سطر نسبة الاستخدام بدل النسبة الرقمية.
-- هذا التبسيط **لا يغيّر منطق الحساب** في `buildInsights`، وإنما يغيّر طريقة عرض الملخص فقط.
+## Dashboard UI notes
+
+- **Quick Summary** intentionally shows 3 fixed lines:
+  1. Remaining budget
+  2. Total spending so far
+  3. Budget usage percentage
+- If `monthlyBudget` is invalid (`<= 0` or non-numeric), the usage line displays fallback text instead of a numeric percentage.
+- This display simplification does **not** change calculation logic in `buildInsights`; only presentation changes.
