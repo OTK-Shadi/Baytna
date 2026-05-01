@@ -1,90 +1,151 @@
-# FamilySpend Intelligence | ذكاء مصروف العائلة
+# Baytna 💙
+### FamilySpend Intelligence — Hackathon MVP
 
-تطبيق تجريبي (MVP) مخصص للهاكاثون لإدارة ميزانية عائلية مشتركة بطريقة ذكية وسهلة، مع تجربة استخدام عربية بالكامل وهوية تصميم "BlueSky Elegant".
+> **Project in one sentence:**
+> A smart family budgeting app that helps all household members track spending together, see what remains, and avoid budget surprises before month-end.
 
-## الرؤية
+---
 
-"FamilySpend Intelligence" يساعد العائلة على:
-- إنشاء ميزانية شهرية مشتركة.
-- تقسيم الإنفاق حسب فئات (الطعام، الإيجار، الترفيه... إلخ).
-- متابعة الصرف لحظيًا بين أفراد العائلة.
-- الحصول على تنبيهات ذكية قبل تجاوز الميزانية.
+## Why this project matters
 
-## القيمة المضافة
+In many families, spending is tracked in a fragmented way across different people, with no single real-time view.
 
-- **بساطة عالية**: لا حاجة لأي خادم أو قاعدة بيانات خارجية.
-- **جاهز للعرض في الهاكاثون**: تدفقات واضحة من البداية حتى لوحة التحكم.
-- **ذكاء مالي عملي**:
-  - أعلى مُنفق.
-  - مؤشر الانضباط.
-  - توقع موعد نفاد الميزانية.
-  - تنبيهات تجاوز حدود الفئات.
-- **تصميم احترافي**: ألوان متناسقة، بطاقات أنيقة، ورسوم بيانية واضحة.
+**Baytna** solves this by offering:
+- One shared monthly budget.
+- Fast expense logging by each member.
+- Smart alerts before things become risky.
+- A clean, Arabic-first dashboard experience.
 
-## التقنيات المستخدمة
+## Problem statement
 
-- Next.js (App Router)
-- TypeScript
-- Tailwind CSS
-- Lucide React (أيقونات)
-- Recharts (الرسوم البيانية)
-- localStorage (تخزين محلي عبر مفتاح واحد: `family_db`)
+- No unified visibility into household spending.
+- Budget overruns are often discovered too late.
+- Hard to identify which category is consuming the most (food, entertainment, transport, etc.).
 
-## التدفقات الرئيسية
+## Our solution
 
-1. **الصفحة الرئيسية**:
-   - إنشاء عائلة (مدير)
-   - الانضمام إلى عائلة (عضو)
+**Baytna** provides a simple and fast workflow:
+1. Admin creates a family and sets the monthly budget and categories.
+2. Admin receives an invite code and shares it.
+3. Members join and add expenses in seconds.
+4. The app analyzes spending in real time and shows smart alerts.
 
-2. **إعداد المدير (3 خطوات)**:
-   - إدخال الاسم + اسم العائلة + الميزانية الشهرية.
-   - اختيار الفئات وتحديد حد لكل فئة + إضافة فئات مخصصة.
-   - إنشاء وعرض كود دعوة فريد.
+---
 
-3. **إعداد العضو**:
-   - إدخال الاسم + كود الدعوة للانضمام.
+## Core features
 
-4. **لوحة التحكم**:
-   - المتبقي من الميزانية + شريط تقدم.
-   - ملخص سريع من 3 أسطر واضحة: المتبقي من الميزانية، إجمالي المصروف حتى الآن، ونسبة استخدام الميزانية (مع نص بديل إذا كانت الميزانية غير صالحة).
-   - تنبيهات ذكية.
-   - رسم دائري للإنفاق حسب الفئة.
-   - قائمة أعلى المُنفقين.
-   - آخر 5 مصروفات + زر "عرض الكل".
+- ✅ Clear onboarding for admin and members.
+- ✅ Invite code-based family joining.
+- ✅ Add expense (title, amount, category, optional note, optional proof).
+- ✅ Smart dashboard showing:
+  - Remaining budget
+  - Usage percentage
+  - Top spenders
+  - Category spending distribution
+- ✅ Smart alerts (budget overrun, high spending pace, category limit exceedance, etc.).
+- ✅ Extra analytics in the Analytics page.
+- ✅ Fully local storage without backend (great for hackathon demos).
 
-5. **إضافة مصروف**:
-   - العنوان، المبلغ، الفئة، ملاحظة (اختيارية)، إثبات (محاكاة/نص Base64 أو وسم "مرفق").
-   - تحديث فوري للوحة مع تنبيه نجاح.
+## 1-minute user journey
 
-## تشغيل المشروع محليًا
+### 1) Admin
+- Enters name, family name, and monthly budget.
+- Selects categories and their limits.
+- Gets an invite code.
+
+### 2) Member
+- Enters name + invite code.
+- Joins the family instantly.
+
+### 3) Daily use
+- Any member adds a new expense.
+- Dashboard updates immediately.
+- Alerts and lightweight recommendations appear.
+
+---
+
+## App routes
+
+- `/` Home page.
+- `/admin/onboarding` Admin setup.
+- `/join` Member join page.
+- `/dashboard` Main dashboard.
+- `/expenses/new` Add new expense.
+- `/expenses` View all expenses.
+- `/analytics` Analytics page.
+- `/family` Family members view.
+- `/settings` Settings and local data reset.
+
+## Financial intelligence in the app
+
+The app calculates automatically:
+- Total spending.
+- Remaining budget.
+- Current budget usage percentage.
+- Warning signals for high spending pace or limit breaches.
+- Early prediction for possible budget depletion before month-end.
+- Smart chart-based analytics that show where money went by month-end, top-spending categories, and weekly spending trend.
+
+---
+
+## Tech stack
+
+- **Next.js (App Router)**
+- **TypeScript**
+- **Tailwind CSS**
+- **Recharts**
+- **Lucide React**
+- **localStorage** (primary key: `family_db`)
+
+## Why this technical approach?
+
+- Fast setup with minimal overhead.
+- Excellent fit for hackathon demo constraints.
+- Smooth user experience with a clean interface.
+
+---
+
+## Run locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-ثم افتح:
+Then open:
 
 ```text
 http://localhost:3000
 ```
 
-## ملاحظات هامة
+## Recommended commands before final demo
 
-- تم تصميم التخزين ليكون خفيفًا ومناسبًا لـ `localStorage`.
-- حقل "الإثبات" لا يرفع ملفات حقيقية للخادم؛ فقط تخزين قيمة نصية (Placeholder/Base64 قصير) لتجنب تجاوز حجم التخزين.
-- جميع الواجهات والنصوص باللغة العربية.
+```bash
+npm run lint
+npm run build
+npm run start
+```
 
+---
 
-## Legacy Design Parity (Phase C)
+## Notes for judges
 
-تم اعتماد تصميم الواجهة المرجعي من الملفات التالية:
-- `index.html`
-- `style.css`
+- This version is a **hackathon MVP** focused on idea clarity, value, and smooth UX.
+- Storage is local via `localStorage` for easy offline/quick demos.
+- The proof field does not upload real files in this MVP (text/placeholder only).
+- UX content is designed for Arabic-speaking users.
 
-في المرحلة C، يتم نقل **هوية التصميم فقط** (ألوان، ظلال، انحناءات، أزرار، وإيقاع بصري) إلى تطبيق React الحالي، مع الحفاظ الكامل على تدفق البيانات الحالي:
-- `useFamilyData`
-- `buildInsights`
-- بنية `localStorage` نفسها (`family_db`)
+## Post-hackathon roadmap
 
-بمعنى: **تحديث مظهر الواجهة بدون أي كسر للمنطق أو التخزين**.
+- More advanced authentication and authorization system.
+- Calendar reminders for recurring static expenses (for example: monthly rent).
+- AI-generated end-of-month summaries with insights and actionable tips to improve next month's budget.
+- Monthly saving goals with automatic recommendations.
+- Smarter behavior-based spending alerts.
+- PDF reports for monthly household spending summaries.
+
+---
+
+## Tagline
+
+**"Baytna helps families spend wisely before the budget runs out."**
