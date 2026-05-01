@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import AppShell from '@/components/AppShell';
 import { useFamilyData } from '@/hooks/useFamilyData';
@@ -17,6 +18,11 @@ export default function ExpensesPage() {
   const [memberId, setMemberId] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [activeProof, setActiveProof] = useState<{ src: string; title: string } | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   if (!ready) return null;
 
@@ -116,9 +122,9 @@ export default function ExpensesPage() {
       </section>
 
 
-      {activeProof && (
+      {isClient && activeProof && createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/65 p-4"
           onClick={() => setActiveProof(null)}
         >
           <div
@@ -135,9 +141,10 @@ export default function ExpensesPage() {
                 إغلاق
               </button>
             </div>
-            <img src={activeProof.src} alt={`مرفق ${activeProof.title}`} className="max-h-[75vh] w-full rounded-xl object-contain" />
+            <img src={activeProof.src} alt={`مرفق ${activeProof.title}`} className="max-h-[85vh] w-full rounded-xl object-contain" />
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </AppShell>
   );
