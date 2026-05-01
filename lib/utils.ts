@@ -54,6 +54,8 @@ export const buildInsights = (family: Family) => {
   if (budget > 0 && totalSpent > budget) {
     alerts.push({
       priority: 1,
+      tone: 'danger',
+      emoji: '🚨',
       message: `تجاوزت الميزانية الشهرية بمقدار ${formatCurrency(totalSpent - budget, family.currency)}.`,
     });
   }
@@ -64,6 +66,8 @@ export const buildInsights = (family: Family) => {
     if (monthProgress >= 0.5 && spendRatio >= 0.55) {
       alerts.push({
         priority: 2,
+        tone: 'warning',
+        emoji: '⚠️',
         message: `منتصف الشهر وصل والإنفاق بلغ ${(spendRatio * 100).toFixed(0)}% من الميزانية.`,
       });
     }
@@ -79,6 +83,8 @@ export const buildInsights = (family: Family) => {
   if (topCategoryByBudget && topCategoryByBudget.share >= 0.4) {
     alerts.push({
       priority: 3,
+      tone: 'warning',
+      emoji: '🟠',
       message: `فئة "${topCategoryByBudget.name}" تستهلك ${(topCategoryByBudget.share * 100).toFixed(0)}% من الميزانية.`,
     });
   }
@@ -87,26 +93,41 @@ export const buildInsights = (family: Family) => {
     if (cat.limit > 0 && cat.spent > cat.limit) {
       alerts.push({
         priority: 4,
+        tone: 'danger',
+        emoji: '⛔',
         message: `فئة "${cat.name}" تجاوزت الحد بمقدار ${formatCurrency(cat.spent - cat.limit, family.currency)}.`,
       });
     }
   });
 
-  const last28Days = 28;
+  const last30Days = 30;
   const now = new Date();
   const startWindow = new Date(now);
-  startWindow.setDate(now.getDate() - last28Days + 1);
-  const weeklyWindowTotal = family.expenses
+  startWindow.setDate(now.getDate() - last30Days + 1);
+  const monthlyWindowTotal = family.expenses
     .filter((expense) => {
       const expenseDate = new Date(expense.createdAt);
       return expenseDate >= startWindow && expenseDate <= now;
     })
     .reduce((sum, expense) => sum + expense.amount, 0);
-  const avgSpendPerWeek = weeklyWindowTotal / 4;
+  const avgSpendPerWeek = monthlyWindowTotal / 4;
+  const projectedMonthlySpend = avgSpendPerWeek * 4;
+  const warningThreshold = budget + budget * 0.15;
+  const weeklyTone =
+    budget <= 0
+      ? 'warning'
+      : projectedMonthlySpend <= budget
+        ? 'success'
+        : projectedMonthlySpend <= warningThreshold
+          ? 'warning'
+          : 'danger';
+  const weeklyEmoji = weeklyTone === 'success' ? '✅' : weeklyTone === 'warning' ? '⚠️' : '🚨';
 
   alerts.push({
     priority: 5,
-    message: `متوسط الصرف الأسبوعي: ${formatCurrency(avgSpendPerWeek, family.currency)}.`,
+    tone: weeklyTone,
+    emoji: weeklyEmoji,
+    message: `متوسط الصرف الأسبوعي (آخر 30 يوم): ${formatCurrency(avgSpendPerWeek, family.currency)}. التقدير الشهري: ${formatCurrency(projectedMonthlySpend, family.currency)}.`,
   });
 
   const todayKey = now.toISOString().slice(0, 10);
@@ -114,6 +135,8 @@ export const buildInsights = (family: Family) => {
   if (!hasExpenseToday) {
     alerts.push({
       priority: 6,
+      tone: 'success',
+      emoji: '✅',
       message: 'لا توجد مصروفات مسجلة اليوم حتى الآن.',
     });
   }

@@ -40,6 +40,8 @@ export interface Family {
 export interface InsightAlert {
   priority: number;
   message: string;
+  tone: 'success' | 'warning' | 'danger';
+  emoji: string;
 }
 
 export interface FamilyDB {
