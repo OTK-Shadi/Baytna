@@ -24,29 +24,37 @@ const createMockMembers = (admin: Member): Member[] => {
   return [admin, ...otherMembers];
 };
 
+const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+
 const createMockExpenses = (members: Member[], categories: Category[]): Expense[] => {
   const mockExpenses: Expense[] = [];
   const memberIds = members.map((member) => member.id);
+
   for (let dayOffset = 0; dayOffset < 25; dayOffset += 1) {
-    const expenseDate = new Date();
-    expenseDate.setDate(expenseDate.getDate() - dayOffset);
-    const dailyExpenseCount = dayOffset % 4 === 0 ? 2 : 1;
+    const baseDate = new Date();
+    baseDate.setDate(baseDate.getDate() - dayOffset);
+    const dailyExpenseCount = randomInt(1, 3);
 
     for (let idx = 0; idx < dailyExpenseCount; idx += 1) {
-      const category = categories[(dayOffset + idx) % categories.length];
-      const title = MOCK_EXPENSE_TITLES[(dayOffset + idx) % MOCK_EXPENSE_TITLES.length];
-      const amount = 4 + ((dayOffset * 7 + idx * 11) % 56);
+      const expenseDate = new Date(baseDate);
+      expenseDate.setHours(randomInt(8, 22), randomInt(0, 59), randomInt(0, 59), 0);
+
+      const category = categories[randomInt(0, categories.length - 1)];
+      const title = MOCK_EXPENSE_TITLES[randomInt(0, MOCK_EXPENSE_TITLES.length - 1)];
+      const amount = randomInt(4, 95);
+
       mockExpenses.push({
         id: generateId('exp'),
         title,
         amount,
         categoryId: category.id,
-        memberId: memberIds[(dayOffset + idx) % memberIds.length],
-        note: MOCK_NOTES[(dayOffset + idx) % MOCK_NOTES.length],
+        memberId: memberIds[randomInt(0, memberIds.length - 1)],
+        note: MOCK_NOTES[randomInt(0, MOCK_NOTES.length - 1)],
         createdAt: expenseDate.toISOString(),
       });
     }
   }
+
   return mockExpenses.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
 };
 
