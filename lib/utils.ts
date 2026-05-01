@@ -80,9 +80,18 @@ export const buildInsights = (family: Family) => {
           .sort((a, b) => b.share - a.share)[0]
       : null;
 
-  if (topCategoryByBudget && topCategoryByBudget.share >= 0.4) {
+  if (budget > 0 && totalSpent >= budget * 0.8) {
     alerts.push({
       priority: 3,
+      tone: 'warning',
+      emoji: '🟠',
+      message: `وصل الإنفاق إلى ${(totalSpent / budget * 100).toFixed(0)}% من الميزانية الشهرية.`,
+    });
+  }
+
+  if (topCategoryByBudget && topCategoryByBudget.share >= 0.4) {
+    alerts.push({
+      priority: 4,
       tone: 'warning',
       emoji: '🟠',
       message: `فئة "${topCategoryByBudget.name}" تستهلك ${(topCategoryByBudget.share * 100).toFixed(0)}% من الميزانية.`,
@@ -92,7 +101,7 @@ export const buildInsights = (family: Family) => {
   categorySpend.forEach((cat) => {
     if (cat.limit > 0 && cat.spent > cat.limit) {
       alerts.push({
-        priority: 4,
+        priority: 5,
         tone: 'danger',
         emoji: '⛔',
         message: `فئة "${cat.name}" تجاوزت الحد بمقدار ${formatCurrency(cat.spent - cat.limit, family.currency)}.`,
@@ -124,7 +133,7 @@ export const buildInsights = (family: Family) => {
   const weeklyEmoji = weeklyTone === 'success' ? '✅' : weeklyTone === 'warning' ? '⚠️' : '🚨';
 
   alerts.push({
-    priority: 5,
+    priority: 6,
     tone: weeklyTone,
     emoji: weeklyEmoji,
     message: `متوسط الصرف الأسبوعي (آخر 30 يوم): ${formatCurrency(avgSpendPerWeek, family.currency)}. التقدير الشهري: ${formatCurrency(projectedMonthlySpend, family.currency)}.`,
@@ -134,7 +143,7 @@ export const buildInsights = (family: Family) => {
   const hasExpenseToday = family.expenses.some((expense) => expense.createdAt.slice(0, 10) === todayKey);
   if (!hasExpenseToday) {
     alerts.push({
-      priority: 6,
+      priority: 7,
       tone: 'success',
       emoji: '✅',
       message: 'لا توجد مصروفات مسجلة اليوم حتى الآن.',
