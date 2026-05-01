@@ -6,6 +6,49 @@ import { generateId, generateInviteCode } from '@/lib/utils';
 import { Category, Expense, Family, FamilyDB, Member } from '@/types/family';
 
 const initialDB: FamilyDB = { families: {}, session: {} };
+const MOCK_MEMBER_NAMES = ['أحمد', 'سارة', 'محمد', 'ليان'];
+const MOCK_EXPENSE_TITLES = ['خضار وفواكه', 'فاتورة كهرباء', 'وقود السيارة', 'طلبات مطعم', 'دواء', 'مستلزمات المدرسة'];
+const MOCK_NOTES = ['تم الشراء من السوق المركزي', 'خصم 10%', 'فاتورة شهرية', 'طلب مستعجل', 'للاستخدام المنزلي'];
+
+const createMockMembers = (admin: Member): Member[] => {
+  const createdAt = new Date().toISOString();
+  const otherMembers: Member[] = MOCK_MEMBER_NAMES
+    .filter((name) => name !== admin.name)
+    .slice(0, 3)
+    .map((name) => ({
+      id: generateId('member'),
+      name,
+      role: 'member',
+      joinedAt: createdAt,
+    }));
+  return [admin, ...otherMembers];
+};
+
+const createMockExpenses = (members: Member[], categories: Category[]): Expense[] => {
+  const mockExpenses: Expense[] = [];
+  const memberIds = members.map((member) => member.id);
+  for (let dayOffset = 0; dayOffset < 25; dayOffset += 1) {
+    const expenseDate = new Date();
+    expenseDate.setDate(expenseDate.getDate() - dayOffset);
+    const dailyExpenseCount = dayOffset % 4 === 0 ? 2 : 1;
+
+    for (let idx = 0; idx < dailyExpenseCount; idx += 1) {
+      const category = categories[(dayOffset + idx) % categories.length];
+      const title = MOCK_EXPENSE_TITLES[(dayOffset + idx) % MOCK_EXPENSE_TITLES.length];
+      const amount = 4 + ((dayOffset * 7 + idx * 11) % 56);
+      mockExpenses.push({
+        id: generateId('exp'),
+        title,
+        amount,
+        categoryId: category.id,
+        memberId: memberIds[(dayOffset + idx) % memberIds.length],
+        note: MOCK_NOTES[(dayOffset + idx) % MOCK_NOTES.length],
+        createdAt: expenseDate.toISOString(),
+      });
+    }
+  }
+  return mockExpenses.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+};
 
 export function useFamilyData() {
   const [db, setDb] = useState<FamilyDB>(initialDB);
@@ -52,8 +95,10 @@ export function useFamilyData() {
     const adminId = generateId('member');
     const now = new Date().toISOString();
 
-    const members: Member[] = [{ id: adminId, name: payload.adminName, role: 'admin', joinedAt: now }];
+    const adminMember: Member = { id: adminId, name: payload.adminName, role: 'admin', joinedAt: now };
+    const members: Member[] = createMockMembers(adminMember);
     const categories: Category[] = payload.categories.map((c) => ({ id: generateId('cat'), name: c.name, limit: c.limit }));
+    const expenses: Expense[] = createMockExpenses(members, categories);
 
     const family: Family = {
       id: familyId,
@@ -64,7 +109,7 @@ export function useFamilyData() {
       createdAt: now,
       members,
       categories,
-      expenses: [],
+      expenses,
     };
 
     const next: FamilyDB = {
