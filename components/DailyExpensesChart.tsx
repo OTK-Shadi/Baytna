@@ -15,7 +15,7 @@ export default function DailyExpensesChart({
   currency: string;
   monthlyBudget: number;
 }) {
-  const [range, setRange] = useState<RangeOption>('month');
+  const [range, setRange] = useState<RangeOption>('30d');
 
   const chartData = useMemo(() => {
     const today = new Date();
@@ -66,9 +66,9 @@ export default function DailyExpensesChart({
         </div>
         <div className="inline-flex w-full rounded-xl bg-slate-100 p-1 sm:w-auto">
           {[
-            { key: '7d', label: 'Last 7 days' },
-            { key: '30d', label: 'Last 30 days' },
-            { key: 'month', label: 'This month' },
+            { key: '7d', label: 'آخر 7 أيام' },
+            { key: '30d', label: 'آخر 30 يومًا' },
+            { key: 'month', label: 'هذا الشهر' },
           ].map((option) => (
             <button
               key={option.key}

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import AppShell from '@/components/AppShell';
 import SmartAlerts from '@/components/SmartAlerts';
 import SpendingPieChart from '@/components/SpendingPieChart';
+import DailyExpensesChart from '@/components/DailyExpensesChart';
 import { useFamilyData } from '@/hooks/useFamilyData';
 import { buildInsights, formatCurrency, getTopSpender } from '@/lib/utils';
 
@@ -128,6 +129,14 @@ export default function DashboardPage() {
               value: c.spent,
             }))}
           />
+
+          <div className="mt-4">
+            <DailyExpensesChart
+              expenses={activeFamily.expenses.map((expense) => ({ amount: expense.amount, createdAt: expense.createdAt }))}
+              currency={activeFamily.currency}
+              monthlyBudget={activeFamily.monthlyBudget}
+            />
+          </div>
         </div>
 
         <div className="card p-4">
