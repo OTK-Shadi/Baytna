@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AppShell from '@/components/AppShell';
 import { useFamilyData } from '@/hooks/useFamilyData';
+
+const MAX_RECEIPT_SIZE_BYTES = 3 * 1024 * 1024;
 
 export default function NewExpensePage() {
   const parsePositiveAmount = (value: string) => {
@@ -18,6 +20,8 @@ export default function NewExpensePage() {
   const [amountInput, setAmountInput] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [note, setNote] = useState('');
+  const [proofImage, setProofImage] = useState<string | undefined>(undefined);
+  const [receiptError, setReceiptError] = useState('');
   const [toast, setToast] = useState('');
   const amount = parsePositiveAmount(amountInput);
 
@@ -31,6 +35,34 @@ export default function NewExpensePage() {
     );
   }
 
+  const onReceiptSelected = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    setReceiptError('');
+
+    if (!file) {
+      setProofImage(undefined);
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      setReceiptError('صيغة الملف غير مدعومة. الرجاء رفع صورة فقط.');
+      event.target.value = '';
+      return;
+    }
+
+    if (file.size > MAX_RECEIPT_SIZE_BYTES) {
+      setReceiptError('حجم الصورة كبير. الحد الأقصى 3MB.');
+      event.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') setProofImage(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (amount === null) return;
@@ -39,6 +71,7 @@ export default function NewExpensePage() {
       amount,
       categoryId,
       note,
+      proof: proofImage,
     });
 
     if (ok) {
@@ -80,6 +113,17 @@ export default function NewExpensePage() {
               ))}
             </select>
             <textarea className="input min-h-24" placeholder="ملاحظة (اختيارية)" value={note} onChange={(e) => setNote(e.target.value)} />
+
+            <div className="space-y-2 rounded-2xl border border-dashed border-slate-200 p-3">
+              <label className="block text-sm font-semibold text-slate-700" htmlFor="receipt">
+                صورة مرجعية (اختياري - مثل الإيصال)
+              </label>
+              <input id="receipt" className="input" type="file" accept="image/*" onChange={onReceiptSelected} />
+              <p className="text-xs text-slate-500">الأنواع المدعومة: صور فقط، بحد أقصى 3MB.</p>
+              {receiptError && <p className="text-xs font-medium text-red-600">{receiptError}</p>}
+              {proofImage && <img src={proofImage} alt="معاينة الإيصال" className="max-h-52 rounded-xl border border-slate-200 object-cover" />}
+            </div>
+
             <button className="btn-primary w-full" type="submit" disabled={amount === null}>
               حفظ المصروف
             </button>

@@ -90,6 +90,16 @@ export default function ExpensesPage() {
                     {expense.note?.trim() ? expense.note : 'لا توجد ملاحظة'}
                   </p>
 
+                  {expense.proof && (
+                    <div className="mt-3">
+                      <img
+                        src={expense.proof}
+                        alt={`مرفق ${expense.title}`}
+                        className="max-h-56 w-full rounded-xl border border-slate-200 object-cover"
+                      />
+                    </div>
+                  )}
+
                   <div className="mt-3 flex justify-end border-t border-slate-100 pt-3">
                     <button className="rounded-lg bg-red-50 px-3 py-1.5 text-sm font-semibold text-red-600" onClick={() => deleteExpense(expense.id)}>
                       حذف
